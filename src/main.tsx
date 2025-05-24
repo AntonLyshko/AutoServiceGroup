@@ -1,12 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './App.tsx';
-import Home from './pages/Home.tsx';
-import ServicePage from './pages/ServicePage.tsx';
-import Gallery from './pages/Gallery.tsx';
-import { servicesData } from './data/servicesData.ts';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './App';
+import Home from './pages/Home';
+import ServicePage from './pages/ServicePage';
+import Gallery from './pages/Gallery';
+import WorkExamplePage from './pages/WorkExamplePage';
+import CarPage from './pages/CarPage'; // Новая страница автомобиля
 import './index.css';
+
+const queryClient = new QueryClient();
 
 const routes = [
 	{
@@ -21,10 +25,18 @@ const routes = [
 				path: 'gallery',
 				element: <Gallery />,
 			},
-			...servicesData.map((service) => ({
-				path: `services/${service.id}`,
-				element: <ServicePage serviceId={service.id} />,
-			})),
+			{
+				path: 'work-examples/:workExampleId',
+				element: <WorkExamplePage />,
+			},
+			{
+				path: 'services/:serviceSlug',
+				element: <ServicePage />,
+			},
+			{
+				path: 'cars/:carId', // Новый маршрут для страницы автомобиля
+				element: <CarPage />,
+			},
 		],
 	},
 ];
@@ -33,6 +45,8 @@ const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<RouterProvider router={router} />
+		<QueryClientProvider client={queryClient}>
+			<RouterProvider router={router} />
+		</QueryClientProvider>
 	</StrictMode>
 );

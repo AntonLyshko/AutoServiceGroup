@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, PhoneCall, Clock, MapPin } from 'lucide-react';
-import { servicesData } from '../data/servicesData';
+import { Menu, X, PhoneCall, Clock, MapPin, Car } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchServices, fetchGeneralData } from '../services/apiService';
+import { TransformedService, TransformedGeneralData } from '../types/api';
+import {
+	formatDisplayPhoneNumber,
+	formatPhoneNumberForTelLink,
+} from '../lib/utils'; // Импортируем функции форматирования
 
 const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 	const location = useLocation();
+
+	const { data: servicesData, isLoading: isLoadingServices } = useQuery<
+		TransformedService[]
+	>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -15,35 +34,46 @@ const Navbar = () => {
 				setScrolled(isScrolled);
 			}
 		};
-
 		window.addEventListener('scroll', handleScroll);
-		return () => {
-			window.removeEventListener('scroll', handleScroll);
-		};
+		return () => window.removeEventListener('scroll', handleScroll);
 	}, [scrolled]);
 
 	useEffect(() => {
 		closeMenu();
-	}, [location.pathname]);
+	}, [location.pathname, location.hash]);
 
-	const toggleMenu = () => {
-		setIsOpen(!isOpen);
+	const toggleMenu = () => setIsOpen(!isOpen);
+	const closeMenu = () => setIsOpen(false);
+
+	const handleNavClick = (
+		e: React.MouseEvent<HTMLAnchorElement>,
+		hash: string
+	) => {
+		closeMenu();
+		if (location.pathname === '/' && hash) {
+			e.preventDefault();
+			const element = document.getElementById(hash.substring(1));
+			element?.scrollIntoView({ behavior: 'smooth' });
+		}
 	};
 
-	const closeMenu = () => {
-		setIsOpen(false);
-	};
+	const navServices =
+		servicesData?.filter((service) => service.id !== 'why-choose-us') ||
+		[];
 
-	const navServices = servicesData.filter(
-		(service) => service.id !== 'why-choose-us'
-	);
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+
+	const displayAddress =
+		generalData?.address || 'Березовский, Транспортников 42А';
 
 	return (
 		<header
 			className={`fixed w-full z-50 transition-all duration-300 ${
 				scrolled
-					? 'bg-gray-900/95 backdrop-blur-sm shadow-lg' // Scrolled state: Solid background with blur
-					: 'bg-gradient-to-b from-gray-950/70 via-gray-950/50 to-transparent' // Top state: Gradient dark to transparent
+					? 'bg-gray-900/95 backdrop-blur-sm shadow-lg'
+					: 'bg-gradient-to-b from-gray-950/70 via-gray-950/50 to-transparent'
 			}`}
 		>
 			<div className='container mx-auto px-4'>
@@ -55,27 +85,33 @@ const Navbar = () => {
 					>
 						ТрейдАвто<span className='text-red-600'>-групп</span>
 					</Link>
-
 					<div className='flex items-center space-x-4'>
 						<div className='hidden md:flex items-center space-x-6 text-gray-300'>
 							<div className='flex items-center'>
 								<PhoneCall size={18} className='mr-2 text-red-500' />
-								<a
-									href='tel:+79655118585'
-									className='hover:text-red-500 transition-colors text-sm lg:text-base'
-								>
-									+7 965 511 8585
-								</a>
+								{isLoadingGeneral ? (
+									<span className='text-sm lg:text-base'>Загрузка...</span>
+								) : (
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										className='hover:text-red-500 transition-colors text-sm lg:text-base'
+									>
+										{displayPhoneFormatted}{' '}
+										{/* Используем отформатированный номер для отображения */}
+									</a>
+								)}
 							</div>
-
 							<div className='flex items-center'>
 								<MapPin size={18} className='mr-2 text-red-500' />
-								<span className='text-sm lg:text-base'>
-									Березовский, Транспортников 42А
-								</span>
+								{isLoadingGeneral ? (
+									<span className='text-sm lg:text-base'>Загрузка...</span>
+								) : (
+									<span className='text-sm lg:text-base'>
+										{displayAddress}
+									</span>
+								)}
 							</div>
 						</div>
-
 						<button
 							className='md:hidden text-white focus:outline-none'
 							onClick={toggleMenu}
@@ -92,23 +128,50 @@ const Navbar = () => {
 					}`}
 				/>
 
-				<nav className='hidden md:flex items-center justify-between flex-wrap py-2'>
-					{navServices.map((service) => (
-						<Link
-							key={service.id}
-							to={`/services/${service.id}`}
-							className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
-						>
-							{service.title}
-						</Link>
-					))}
+				<nav className='hidden md:flex items-center justify-start flex-wrap py-2 gap-x-3 lg:gap-x-4'>
+					{isLoadingServices && (
+						<div className='h-[36px] py-2 text-gray-400'>
+							Загрузка меню...
+						</div>
+					)}
+					{!isLoadingServices && navServices.length > 0 && (
+						<>
+							{navServices.map((service) => (
+								<Link
+									key={service.id}
+									to={`/services/${service.id}`}
+									className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
+								>
+									{service.title}
+								</Link>
+							))}
+						</>
+					)}
 					<Link
 						to='/gallery'
 						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
 					>
 						Наши работы
 					</Link>
+					<Link
+						to='/#cars-for-sale'
+						onClick={(e) => handleNavClick(e, '#cars-for-sale')}
+						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold flex items-center'
+					>
+						<Car size={18} className='mr-1.5 text-red-500' />
+						Авто на продажу
+					</Link>
+					<Link
+						to='/#contact'
+						onClick={(e) => handleNavClick(e, '#contact')}
+						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
+					>
+						Контакты
+					</Link>
 				</nav>
+				{!isLoadingServices && navServices.length === 0 && (
+					<div className='hidden md:block h-[36px] py-2'></div>
+				)}
 			</div>
 
 			<div
@@ -123,12 +186,14 @@ const Navbar = () => {
 				>
 					<X size={28} />
 				</button>
-
 				<div className='flex flex-col h-full overflow-y-auto py-20 px-4 space-y-4'>
 					<h3 className='text-xl font-semibold text-white border-b border-gray-700 pb-2'>
 						Услуги
 					</h3>
 					<div className='flex flex-col space-y-3 pl-2'>
+						{isLoadingServices && (
+							<p className='text-gray-400'>Загрузка услуг...</p>
+						)}
 						{navServices.map((service) => (
 							<Link
 								key={service.id}
@@ -140,7 +205,6 @@ const Navbar = () => {
 							</Link>
 						))}
 					</div>
-
 					<Link
 						to='/gallery'
 						className='text-xl text-white hover:text-red-500 transition-colors pt-2 border-t border-gray-700 mt-4'
@@ -148,24 +212,46 @@ const Navbar = () => {
 					>
 						Наши работы
 					</Link>
-
+					<Link
+						to='/#cars-for-sale'
+						onClick={(e) => handleNavClick(e, '#cars-for-sale')}
+						className='text-xl text-white hover:text-red-500 transition-colors pt-2 flex items-center'
+					>
+						<Car size={22} className='mr-2 text-red-500' />
+						Авто на продажу
+					</Link>
+					<Link
+						to='/#contact'
+						onClick={(e) => handleNavClick(e, '#contact')}
+						className='text-xl text-white hover:text-red-500 transition-colors pt-2'
+					>
+						Контакты
+					</Link>
 					<div className='mt-auto pt-6 border-t border-gray-700 space-y-4'>
-						<div className='flex items-center text-white'>
-							<PhoneCall size={20} className='mr-3 text-red-500' />
-							<a href='tel:+79655118585' className='text-lg'>
-								+7 965 511 8585
-							</a>
-						</div>
-						<div className='flex items-center text-white'>
-							<Clock size={20} className='mr-3 text-red-500' />
-							<span className='text-lg'>10:00-22:00</span>
-						</div>
-						<div className='flex items-start text-white'>
-							<MapPin size={20} className='mr-3 text-red-500 mt-1' />
-							<span className='text-lg'>
-								Березовский, Транспортников 42А
-							</span>
-						</div>
+						{isLoadingGeneral ? (
+							<p className='text-gray-400'>Загрузка контактов...</p>
+						) : (
+							<>
+								<div className='flex items-center text-white'>
+									<PhoneCall size={20} className='mr-3 text-red-500' />
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										className='text-lg'
+									>
+										{displayPhoneFormatted}{' '}
+										{/* Используем отформатированный номер для отображения */}
+									</a>
+								</div>
+								<div className='flex items-center text-white'>
+									<Clock size={20} className='mr-3 text-red-500' />
+									<span className='text-lg'>10:00-22:00</span>
+								</div>
+								<div className='flex items-start text-white'>
+									<MapPin size={20} className='mr-3 text-red-500 mt-1' />
+									<span className='text-lg'>{displayAddress}</span>
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			</div>

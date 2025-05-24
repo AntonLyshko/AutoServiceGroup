@@ -1,207 +1,4620 @@
-Главный экран:
+# Project Structure
 
-Первый экран - УТП (Придумай сам)
+```
+├── src
+│   ├── components
+│   │   ├── CarCard.tsx
+│   │   ├── CarsForSaleSection.tsx
+│   │   ├── Contact.tsx
+│   │   ├── Footer.tsx
+│   │   ├── GalleryPreview.tsx
+│   │   ├── Hero.tsx
+│   │   ├── ImageCompare.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── ServiceCard.tsx
+│   │   ├── ServicesSection.tsx
+│   │   └── StrapiRichTextRenderer.tsx
+│   ├── data
+│   │   ├── imageData.ts
+│   │   └── servicesData.ts
+│   ├── img
+│   │   ├── img_1.webp
+│   │   └── img_2.png
+│   ├── lib
+│   │   ├── graphql.ts
+│   │   ├── queries.ts
+│   │   ├── utils.ts
+│   │   └── ymaps.ts
+│   ├── pages
+│   │   ├── CarPage.tsx
+│   │   ├── Gallery.tsx
+│   │   ├── Home.tsx
+│   │   ├── ServicePage.tsx
+│   │   └── WorkExamplePage.tsx
+│   ├── services
+│   │   └── apiService.ts
+│   ├── types
+│   │   └── api.ts
+│   ├── App.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+```
 
-Блок 2. Почему выбирают нас. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Удобства работы с нами
-Сами закажем запчасть, сами привезем и поставим, от вас только автомобиль и хорошее настроение
+# File Contents
 
-Блок 3. Слесарные работы. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Капитальный ремонт ДВС
-    Ремонт ГБЦ
-    Капитальный ремонт механических коробок
-    Обслуживание ходовой части
-    Ремонт мостов
-    Ремонт кардана
-    Ремонт рулевых реек
-    Восстановление ваших стоек амортизаторов
-    Замена ступичных подшипников
-    Замена колодок
-    Полное ТО
-    Замена масла в ДВС
-    Замена масла в КПП
-    Замена масла в системе ГУР
-    Промывка системы
-    Шиномонтаж
-    Замена радиатора
-    Замена радиатора печки
-    Замена ГРМ
-    Восстановление генераторов
-    Ремонт топливной системы
-    Замена бензонасоса
-    Промывка топливного бака
-    Шлифовка/расточка ГБЦ и Блоков
-    Восстановление и установка выхлопных систем
-    Замена всех технических жидкостей
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+## src/App.tsx
 
-Блок 4. Диагностика. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Диагностика электронная (компьютерная)
-    Диагностика механическая
-    Комплексная диагностика (Полный осмотр авто)
-    Измерение компрессии в цилиндре
-    Проверка эндоскопом
-    Диагностика фар
-    Диагностика проводки
+```tsx
+import React from 'react';
+import { Outlet, ScrollRestoration } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
-(Диагностику типо на фоне машина и чел с компом что-то такое добавить)
+function App() {
+	return (
+		<div className='min-h-screen bg-gray-900 text-white flex flex-col'>
+			<Navbar />
+			<ScrollRestoration />
+			<main className='flex-grow'>
+				{' '}
+				<Outlet />
+			</main>
+			<Footer />
+		</div>
+	);
+}
 
-Блок 5. Электрика. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Восстановление и замена проводки
-    Ремонт фар
-    Ремонт приборной панели
-    Установка музыки (колонки, настройка магнитофона, савбуфер, усилитель и т.д.)
-    Установка сигнализации
-    Замена лампочек (В фарах, приборной панели, на торпедо) 
-    Восстановление систем SRS (восстановление полной системы безопаности подушек, ремней)
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+export default App;
 
-Блок 6. Покраска. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Полный окрас авто
-    Частичный окрас авто
-    Восстановление бамперов
-    Восстановление геометрии
-    Восстановление/выставление зазоров 
-    Покрас подкапотного пространства
-    Восстановление кабин грузовых авто (Газели, Hyundai Porter и т.д.)
-(Кузовные работы типо фото до и после типо такого)
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+```
 
-Блок 7. Сварочные работы. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Переварка порогов
-    Переварка дна
-    Переварка арок
-    Переварка лонжеронов 
-    Переварка балки
-    Переварка глушителей
-    Переварка крыши
-    Переварка телевизоров
-(Сварочные работы фото бы именно со сваркой какой нибудь)
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+## src/components/CarCard.tsx
 
-Блок 8. Детейлинг. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    Предпродажная подготовка (легкая полировка кузова и легкая химчистка салона)
-    Полная полировка кузова
-    Тонировка стекол любой сложности
-    Перешивка руля и салона
-    Перешивка ручек АКПП
-    Перешивка подлокотников
-    Обтягивание авто пленкой
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { TransformedCarPreview } from '../types/api';
+import { CarFront } from 'lucide-react'; // Иконка для плейсхолдера или акцента
 
-Блок 9. Запчасти. Должна быть кнопка на отдельную страницу посвященную этой услуге. Картинка услуги на фоне блока. 
-Список услуг:
-    У нас вы можете заказать любую запчасть на ваш автомобиль как новую так и контрактную по самым низким ценам  с доставкой
-    Сотрудничаем напрямую с крупными дестрибьютерами запчастей и жидкостей
-Из этого списка составь краткое описание этой сферы услуг. Весь список писать в блоке не нужно.
+interface CarCardProps {
+	car: TransformedCarPreview;
+}
 
-Блок 10. Галерея. 
-(Примеры наших работ) (немного картинок с кнопкой на страницу полной галереи)
-С БОЛЬШИМИ КАРТИНКАМИ. 
+const CarCard: React.FC<CarCardProps> = ({ car }) => {
+	return (
+		<Link
+			to={`/cars/${car.id}`}
+			className='group block bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-red-500/40 transition-all duration-300'
+		>
+			<div className='relative w-full h-56 md:h-64 bg-gray-700'>
+				{car.imageUrl && car.imageUrl !== '/placeholder.png' ? (
+					<img
+						src={car.imageUrl}
+						alt={car.title}
+						// Убраны классы: transition-transform duration-500 group-hover:scale-105
+						className='w-full h-full object-cover'
+						loading='lazy'
+					/>
+				) : (
+					<div className='w-full h-full flex items-center justify-center text-gray-500'>
+						<CarFront size={64} />
+					</div>
+				)}
+				{/* Оверлей можно оставить или убрать, по желанию. Сейчас он немного затемняет картинку при наведении. */}
+				{/* Если хотите убрать и его эффект при наведении, измените opacity-80 group-hover:opacity-90 на просто opacity-80 или другой фиксированный */}
+				<div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300'></div>
+			</div>
+			<div className='p-5'>
+				<h3 className='text-xl font-semibold text-white mb-2 truncate group-hover:text-red-500 transition-colors duration-300'>
+					{car.title}
+				</h3>
+				<p className='text-2xl font-bold text-red-500 mb-3'>{car.cost}</p>
+				<span className='inline-block w-full text-center bg-red-600 group-hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300'>
+					Подробнее
+				</span>
+			</div>
+		</Link>
+	);
+};
+
+export default CarCard;
+```
+
+## src/components/CarsForSaleSection.tsx
+
+```tsx
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchCarsForSalePreview } from '../services/apiService';
+import { TransformedCarPreview } from '../types/api';
+import CarCard from './CarCard';
+
+const CarsForSaleSection = () => {
+	const {
+		data: cars,
+		isLoading,
+		error,
+	} = useQuery<TransformedCarPreview[]>({
+		queryKey: ['carsForSalePreview'],
+		queryFn: fetchCarsForSalePreview,
+	});
+
+	if (isLoading) {
+		return (
+			<section className='py-20 bg-gray-900'>
+				<div className='container mx-auto px-4 text-center text-white'>
+					Загрузка автомобилей...
+				</div>
+			</section>
+		);
+	}
+
+	if (error) {
+		return (
+			<section className='py-20 bg-gray-900'>
+				<div className='container mx-auto px-4 text-center text-red-500'>
+					Ошибка загрузки автомобилей на продажу.
+				</div>
+			</section>
+		);
+	}
+
+	if (!cars || cars.length === 0) {
+		return (
+			<section className='py-20 bg-gray-900'>
+				<div className='container mx-auto px-4'>
+					<div className='text-center mb-12'>
+						<h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+							Автомобили на продажу
+						</h2>
+						<p className='text-gray-400 max-w-2xl mx-auto'>
+							В данный момент нет автомобилей в продаже. Загляните позже!
+						</p>
+					</div>
+				</div>
+			</section>
+		);
+	}
+
+	return (
+		<section id='cars-for-sale' className='py-20 bg-gray-900'>
+			<div className='container mx-auto px-4'>
+				<div className='text-center mb-12'>
+					<h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+						Автомобили на продажу
+					</h2>
+					<p className='text-gray-400 max-w-2xl mx-auto'>
+						Ознакомьтесь с автомобилями, доступными для покупки в нашем
+						автосервисе.
+					</p>
+				</div>
+
+				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8'>
+					{cars.map((car) => (
+						<CarCard key={car.id} car={car} />
+					))}
+				</div>
+			</div>
+		</section>
+	);
+};
+
+export default CarsForSaleSection;
+
+```
+
+## src/components/Contact.tsx
+
+```tsx
+import React from 'react';
+import { PhoneCall, Clock, MapPin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchGeneralData } from '../services/apiService';
+import { TransformedGeneralData } from '../types/api';
+import {
+	formatDisplayPhoneNumber,
+	formatPhoneNumberForTelLink,
+} from '../lib/utils'; // Импортируем функции форматирования
+
+const Contact = () => {
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	// Используем телефон из generalData или дефолтный
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	// Форматируем для отображения
+	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
+	// Форматируем для tel: ссылки
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+
+	const displayAddress =
+		generalData?.address || 'Березовский, Транспортников 42А';
+
+	// Формируем URL для Google Maps iframe с использованием displayAddress
+	// Кодируем адрес для URL
+	const encodedAddress = encodeURIComponent(displayAddress);
+	// Базовый URL с параметром pb, который определяет начальный вид карты.
+	// Добавляем параметр q с кодированным адресом.
+	const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2181.6180769263375!2d60.8088433!3d56.911438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x43c16ef7c6fa7b47%3A0xa7e554c1ab3edbd8!2z0YPQuy4g0KLRgNCw0L3RgdC_0L7RgNGC0L3QuNC60L7QsiwgNDLQkCwg0JHQtdGA0ZHQt9C-0LLRgdC60LjQuSwg0KHQstC10YDQtNC70L7QstGB0LrQsNGPINC-0LHQuy4sIDYyMzcwMg!5e0!3m2!1sru!2sru!4v1716915066364!5m2!1sru!2sru&q=${encodedAddress}`;
+
+	return (
+		<section id='contact' className='py-20 bg-gray-900'>
+			<div className='container mx-auto px-4'>
+				<div className='text-center mb-12'>
+					<h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+						Контакты
+					</h2>
+					<p className='text-gray-400 max-w-2xl mx-auto'>
+						Свяжитесь с нами или приезжайте прямо сейчас, чтобы получить
+						консультацию по ремонту и обслуживанию вашего автомобиля
+					</p>
+				</div>
+
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-8 items-center'>
+					<div className='bg-gray-800 p-8 rounded-lg shadow-lg'>
+						<h3 className='text-2xl font-bold text-white mb-6'>
+							Наши контакты
+						</h3>
+						{isLoadingGeneral ? (
+							<div className='space-y-6'>
+								<p className='text-gray-300'>Загрузка контактов...</p>
+							</div>
+						) : (
+							<div className='space-y-6'>
+								<div className='flex items-start'>
+									<div className='bg-red-600 p-3 rounded-full mr-4'>
+										<PhoneCall size={24} className='text-white' />
+									</div>
+									<div>
+										<h4 className='text-lg font-semibold text-white'>
+											Телефон
+										</h4>
+										<a
+											href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+											className='text-gray-300 hover:text-red-500 transition-colors'
+										>
+											{displayPhoneFormatted}{' '}
+											{/* Используем отформатированный номер для отображения */}
+										</a>
+									</div>
+								</div>
+
+								<div className='flex items-start'>
+									<div className='bg-red-600 p-3 rounded-full mr-4'>
+										<Clock size={24} className='text-white' />
+									</div>
+									<div>
+										<h4 className='text-lg font-semibold text-white'>
+											Часы работы
+										</h4>
+										<p className='text-gray-300'>Ежедневно: 10:00-22:00</p>
+									</div>
+								</div>
+
+								<div className='flex items-start'>
+									<div className='bg-red-600 p-3 rounded-full mr-4'>
+										<MapPin size={24} className='text-white' />
+									</div>
+									<div>
+										<h4 className='text-lg font-semibold text-white'>
+											Адрес
+										</h4>
+										<p className='text-gray-300'>{displayAddress}</p>
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div className='h-[400px] rounded-lg overflow-hidden shadow-lg'>
+						{isLoadingGeneral ? (
+							<div className='w-full h-full flex items-center justify-center bg-gray-700 text-white'>
+								Загрузка карты...
+							</div>
+						) : (
+							<iframe
+								src={mapSrc} // Используем динамически сгенерированный URL
+								width='100%'
+								height='100%'
+								style={{ border: 0 }}
+								allowFullScreen
+								loading='lazy'
+								referrerPolicy='no-referrer-when-downgrade'
+								title='Auto Service location'
+							></iframe>
+						)}
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+};
+
+export default Contact;
+
+```
+
+## src/components/Footer.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import {
+	PhoneCall,
+	Clock,
+	MapPin,
+	// Instagram, // Убрали импорт Instagram
+	// Facebook, // Убрали импорт Facebook
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchGeneralData } from '../services/apiService';
+import { TransformedGeneralData } from '../types/api';
+import {
+	formatDisplayPhoneNumber,
+	formatPhoneNumberForTelLink,
+} from '../lib/utils'; // Импортируем функции форматирования
+
+const Footer = () => {
+	const currentYear = new Date().getFullYear();
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+
+	const displayAddress =
+		generalData?.address || 'Березовский, Транспортников 42А';
+
+	return (
+		<footer className='bg-gray-950 text-white'>
+			<div className='container mx-auto px-4 py-12'>
+				<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+					<div>
+						<Link
+							to='/'
+							className='text-2xl font-bold flex items-center mb-4'
+						>
+							<span className='text-red-600'>ТрейдАвто</span>-групп
+						</Link>
+						<p className='text-gray-400 mb-6'>
+							Профессиональный ремонт и обслуживание автомобилей любых
+							марок с использованием современного оборудования
+						</p>
+						{/* Блок с иконками социальных сетей удален */}
+						{/* 
+                        <div className='flex space-x-4'>
+							<a
+								href='#'
+								className='text-gray-400 hover:text-red-500 transition-colors'
+							>
+								<Instagram size={24} />
+							</a>
+							<a
+								href='#'
+								className='text-gray-400 hover:text-red-500 transition-colors'
+							>
+								<Facebook size={24} />
+							</a>
+						</div>
+                        */}
+					</div>
+
+					<div>
+						<h3 className='text-xl font-semibold mb-4 text-white'>
+							Услуги
+						</h3>
+						<ul className='space-y-2'>
+							<li>
+								<Link
+									to='/services/mechanical-work'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Слесарные работы
+								</Link>
+							</li>
+							<li>
+								<Link
+									to='/services/diagnostics'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Диагностика
+								</Link>
+							</li>
+							<li>
+								<Link
+									to='/services/electrical'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Электрика
+								</Link>
+							</li>
+							<li>
+								<Link
+									to='/services/painting'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Покраска
+								</Link>
+							</li>
+							<li>
+								<Link
+									to='/services/welding'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Сварочные работы
+								</Link>
+							</li>
+							<li>
+								<Link
+									to='/services/detailing'
+									className='text-gray-400 hover:text-red-500 transition-colors'
+								>
+									Детейлинг
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					<div>
+						<h3 className='text-xl font-semibold mb-4 text-white'>
+							Контакты
+						</h3>
+						{isLoadingGeneral ? (
+							<div className='space-y-4'>
+								<p className='text-gray-400'>Загрузка контактов...</p>
+							</div>
+						) : (
+							<div className='space-y-4'>
+								<div className='flex items-center'>
+									<PhoneCall size={20} className='text-red-500 mr-3' />
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										className='text-gray-400 hover:text-red-500 transition-colors'
+									>
+										{displayPhoneFormatted}{' '}
+										{/* Используем отформатированный номер для отображения */}
+									</a>
+								</div>
+								<div className='flex items-center'>
+									<Clock size={20} className='text-red-500 mr-3' />
+									<span className='text-gray-400'>10:00-22:00</span>
+								</div>
+								<div className='flex items-start'>
+									<MapPin size={20} className='text-red-500 mr-3 mt-1' />
+									<span className='text-gray-400'>{displayAddress}</span>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className='border-t border-gray-800 mt-12 pt-6 text-center'>
+					<p className='text-gray-500'>
+						© {currentYear} ТрейдАвто-групп. Все права защищены.
+					</p>
+				</div>
+			</div>
+		</footer>
+	);
+};
+
+export default Footer;
+
+```
+
+## src/components/GalleryPreview.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWorkExamplesForPreview } from '../services/apiService';
+import { TransformedWorkExamplePreviewItem } from '../types/api';
+import ImageCompare from './ImageCompare';
+
+const GalleryPreview = () => {
+	const {
+		data: workExamplesPreviewData,
+		isLoading,
+		error,
+	} = useQuery<TransformedWorkExamplePreviewItem[]>({
+		queryKey: ['workExamplesPreview'], // Ключ для кеширования
+		queryFn: fetchWorkExamplesForPreview,
+	});
+
+	if (isLoading) {
+		return (
+			<section className='py-20 bg-gray-950'>
+				<div className='container mx-auto px-4 text-center text-white'>
+					Загрузка примеров работ...
+				</div>
+			</section>
+		);
+	}
+
+	if (error || !workExamplesPreviewData) {
+		return (
+			<section className='py-20 bg-gray-950'>
+				<div className='container mx-auto px-4 text-center text-red-500'>
+					Ошибка загрузки примеров работ.
+				</div>
+			</section>
+		);
+	}
+
+	const previewItems = workExamplesPreviewData.slice(0, 6);
+
+	return (
+		<section className='py-20 bg-gray-950'>
+			<div className='container mx-auto px-4'>
+				<div className='text-center mb-12'>
+					<h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+						Наши работы
+					</h2>
+					<p className='text-gray-400 max-w-2xl mx-auto'>
+						Примеры выполненных работ по ремонту, обслуживанию и детейлингу
+						автомобилей.
+					</p>
+				</div>
+
+				{previewItems.length === 0 && !isLoading && (
+					<p className='text-center text-gray-400'>
+						Примеров работ пока нет.
+					</p>
+				)}
+
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 mb-12'>
+					{previewItems.map((item) => (
+						// item здесь TransformedWorkExamplePreviewItem
+						// item.id это ID первого gallery_item или ID WorkExample (если gallery_item нет)
+						// item.workExampleId это всегда ID WorkExample
+						<div
+							key={item.workExampleId + (item.id || '')}
+							className='group'
+						>
+							{/* Ссылка ведет на страницу конкретного примера работы */}
+							<Link to={`/work-examples/${item.workExampleId}`}>
+								<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800'>
+									{item.type === 'single' ? (
+										<img
+											src={item.imageUrl} // URL из TransformedWorkExamplePreviewItem
+											alt={item.title} // title из TransformedWorkExamplePreviewItem
+											className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+											loading='lazy'
+										/>
+									) : (
+										<ImageCompare
+											beforeImage={item.beforeImage} // Убедитесь, что beforeImage и afterImage существуют для type 'beforeAfter'
+											afterImage={item.afterImage}
+											altBefore={`До - ${item.title}`}
+											altAfter={`После - ${item.title}`}
+										/>
+									)}
+								</div>
+							</Link>
+							<div>
+								<h4 className='text-lg font-semibold text-white mb-1'>
+									<Link
+										to={`/work-examples/${item.workExampleId}`}
+										className='hover:text-red-500'
+									>
+										{/* Отображаем originalTitle (заголовок WorkExample) */}
+										{item.originalTitle}
+									</Link>
+									{item.type === 'beforeAfter' && (
+										<span className='text-sm text-gray-400 ml-2'>
+											(До/После){' '}
+											{/* Это относится к типу отображения карточки, а не всего WorkExample */}
+										</span>
+									)}
+								</h4>
+								{/* Отображаем description от WorkExample (через originalTitle) или от gallery_item */}
+								<p className='text-gray-300 text-sm'>{item.description}</p>
+							</div>
+						</div>
+					))}
+				</div>
+
+				{previewItems.length > 0 && (
+					<div className='text-center'>
+						<Link
+							to='/gallery' // Ссылка на страницу со списком всех примеров работ
+							className='inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-md transition-colors duration-300'
+						>
+							Смотреть все работы
+						</Link>
+					</div>
+				)}
+			</div>
+		</section>
+	);
+};
+
+export default GalleryPreview;
+
+```
+
+## src/components/Hero.tsx
+
+```tsx
+import React from 'react';
+import { ChevronDown, MessageCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchHeroData, fetchGeneralData } from '../services/apiService'; // Добавлен fetchGeneralData
+import { TransformedHeroData, TransformedGeneralData } from '../types/api'; // Добавлен TransformedGeneralData
+import heroBackgroundImage from '../img/img_1.webp';
+
+const Hero = () => {
+	const {
+		data: heroData,
+		isLoading: isLoadingHero,
+		error: errorHero,
+	} = useQuery<TransformedHeroData | null>({
+		queryKey: ['heroData'],
+		queryFn: fetchHeroData,
+	});
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	const scrollToContent = () => {
+		window.scrollTo({
+			top: window.innerHeight,
+			behavior: 'smooth',
+		});
+	};
+
+	let title = 'Автосервис';
+	let secondTitle = 'ТрейдАвто-групп';
+	let description =
+		'Профессиональный ремонт и обслуживание автомобилей любых марок с использованием современного оборудования и оригинальных запчастей';
+
+	if (isLoadingHero) {
+		title = 'Загрузка...';
+		secondTitle = '';
+		description = 'Пожалуйста, подождите.';
+	} else if (errorHero || !heroData) {
+		console.error('Ошибка загрузки данных для Hero:', errorHero);
+	} else if (heroData) {
+		title = heroData.title;
+		secondTitle = heroData.secondTitle;
+		description = heroData.description;
+	}
+
+	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
+	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+
+	return (
+		<div
+			className='relative h-screen w-full bg-cover bg-center flex items-center'
+			style={{
+				backgroundImage: `url(${heroBackgroundImage})`,
+				backgroundPosition: 'center',
+				backgroundSize: 'cover',
+			}}
+		>
+			<div className='absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80 z-0'></div>
+
+			<div className='container mx-auto px-4 z-10 text-center'>
+				<h1 className='text-4xl md:text-6xl font-bold text-white mb-6'>
+					{title}
+					<br />
+					<span className='text-red-600 relative top-2'>
+						{secondTitle}
+					</span>
+				</h1>
+				<p className='text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto'>
+					{description}
+				</p>
+				<div className='flex flex-col sm:flex-row justify-center gap-4'>
+					{isLoadingGeneral ? (
+						<div className='py-3 px-8 bg-green-600 text-white font-semibold rounded-md flex items-center justify-center opacity-50'>
+							<MessageCircle className='mr-2' size={20} />
+							Загрузка...
+						</div>
+					) : (
+						<a
+							href={whatsAppLink}
+							target='_blank'
+							rel='noopener noreferrer'
+							className='py-3 px-8 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors duration-300 flex items-center justify-center'
+						>
+							<MessageCircle className='mr-2' size={20} />
+							Написать в WhatsApp
+						</a>
+					)}
+					<button
+						onClick={scrollToContent}
+						className='py-3 px-8 bg-transparent border-2 border-white hover:bg-white hover:text-gray-900 text-white font-semibold rounded-md transition-all duration-300'
+					>
+						Узнать больше
+					</button>
+				</div>
+			</div>
+
+			<div className='absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce'>
+				<button
+					onClick={scrollToContent}
+					className='text-white focus:outline-none'
+					aria-label='Scroll down'
+				>
+					<ChevronDown size={32} />
+				</button>
+			</div>
+		</div>
+	);
+};
+
+export default Hero;
+
+```
+
+## src/components/ImageCompare.tsx
+
+```tsx
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+
+interface ImageCompareProps {
+	beforeImage: string;
+	afterImage: string;
+	altBefore?: string;
+	altAfter?: string;
+}
+
+const ImageCompare: React.FC<ImageCompareProps> = ({
+	beforeImage,
+	afterImage,
+	altBefore = 'Before',
+	altAfter = 'After',
+}) => {
+	const [sliderPosition, setSliderPosition] = useState<number>(50); // Позиция слайдера в %
+	const [isDragging, setIsDragging] = useState<boolean>(false); // Только для тач
+	const containerRef = useRef<HTMLDivElement>(null);
+	const handleRef = useRef<HTMLDivElement>(null);
+	// Убрали beforeImageRef, так как clip-path применяется прямо к img
+
+	const updateSliderPosition = useCallback((clientX: number) => {
+		if (!containerRef.current) return;
+		const rect = containerRef.current.getBoundingClientRect();
+		let x = clientX - rect.left;
+		x = Math.max(0, Math.min(x, rect.width));
+		const percent = (x / rect.width) * 100;
+		setSliderPosition(percent);
+	}, []);
+
+	const handleMouseMove = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			updateSliderPosition(e.clientX);
+		},
+		[updateSliderPosition]
+	);
+
+	const handleTouchStart = useCallback(
+		(e: React.TouchEvent<HTMLDivElement>) => {
+			if (
+				e.target === handleRef.current ||
+				handleRef.current?.contains(e.target as Node)
+			) {
+				setIsDragging(true);
+				if (e.touches.length > 0) {
+					updateSliderPosition(e.touches[0].clientX);
+				}
+			}
+		},
+		[updateSliderPosition]
+	);
+
+	const handleTouchMove = useCallback(
+		(e: TouchEvent) => {
+			if (!isDragging) return;
+			if (e.touches.length > 0) {
+				updateSliderPosition(e.touches[0].clientX);
+			}
+		},
+		[isDragging, updateSliderPosition]
+	);
+
+	const handleTouchEnd = useCallback(() => {
+		if (isDragging) {
+			setIsDragging(false);
+		}
+	}, [isDragging]);
+
+	useEffect(() => {
+		if (isDragging) {
+			document.addEventListener('touchmove', handleTouchMove, {
+				passive: false,
+			});
+			document.addEventListener('touchend', handleTouchEnd);
+			document.addEventListener('touchcancel', handleTouchEnd);
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => {
+			document.removeEventListener('touchmove', handleTouchMove);
+			document.removeEventListener('touchend', handleTouchEnd);
+			document.removeEventListener('touchcancel', handleTouchEnd);
+			document.body.style.overflow = '';
+		};
+	}, [isDragging, handleTouchMove, handleTouchEnd]);
+
+	return (
+		<div
+			ref={containerRef}
+			className='relative w-full h-full overflow-hidden select-none'
+			onMouseMove={handleMouseMove}
+			onTouchStart={handleTouchStart}
+		>
+			{/* After Image (Базовый слой) */}
+			<img
+				src={afterImage}
+				alt={altAfter}
+				className='absolute top-0 left-0 w-full h-full object-cover pointer-events-none'
+				loading='lazy'
+			/>
+
+			{/* Before Image (Слой с маской) */}
+			{/* Теперь clip-path применяется прямо к изображению */}
+			<img
+				src={beforeImage}
+				alt={altBefore}
+				className='absolute top-0 left-0 w-full h-full object-cover pointer-events-none'
+				style={{
+					// clipPath: `inset(0px ${100 - sliderPosition}% 0px 0px)`, // Стандартный синтаксис
+					clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)`, // Через полигон, более надежно
+				}}
+				loading='lazy'
+			/>
+
+			{/* Slider Handle */}
+			<div
+				ref={handleRef}
+				className='absolute top-0 bottom-0 w-1 bg-red-600 z-10 pointer-events-none md:pointer-events-auto'
+				style={{
+					left: `calc(${sliderPosition}% - 0.5px)`,
+					touchAction: 'none',
+				}}
+			>
+				{/* Визуальный элемент ползунка */}
+				<div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-red-600 border-2 border-white flex items-center justify-center shadow-md'>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={2}
+						stroke='white'
+						className='w-6 h-6'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9'
+						/>
+					</svg>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default ImageCompare;
+
+```
+
+## src/components/Navbar.tsx
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, PhoneCall, Clock, MapPin, Car } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchServices, fetchGeneralData } from '../services/apiService';
+import { TransformedService, TransformedGeneralData } from '../types/api';
+import {
+	formatDisplayPhoneNumber,
+	formatPhoneNumberForTelLink,
+} from '../lib/utils'; // Импортируем функции форматирования
+
+const Navbar = () => {
+	const [isOpen, setIsOpen] = useState(false);
+	const [scrolled, setScrolled] = useState(false);
+	const location = useLocation();
+
+	const { data: servicesData, isLoading: isLoadingServices } = useQuery<
+		TransformedService[]
+	>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	useEffect(() => {
+		const handleScroll = () => {
+			const isScrolled = window.scrollY > 10;
+			if (isScrolled !== scrolled) {
+				setScrolled(isScrolled);
+			}
+		};
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [scrolled]);
+
+	useEffect(() => {
+		closeMenu();
+	}, [location.pathname, location.hash]);
+
+	const toggleMenu = () => setIsOpen(!isOpen);
+	const closeMenu = () => setIsOpen(false);
+
+	const handleNavClick = (
+		e: React.MouseEvent<HTMLAnchorElement>,
+		hash: string
+	) => {
+		closeMenu();
+		if (location.pathname === '/' && hash) {
+			e.preventDefault();
+			const element = document.getElementById(hash.substring(1));
+			element?.scrollIntoView({ behavior: 'smooth' });
+		}
+	};
+
+	const navServices =
+		servicesData?.filter((service) => service.id !== 'why-choose-us') ||
+		[];
+
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+
+	const displayAddress =
+		generalData?.address || 'Березовский, Транспортников 42А';
+
+	return (
+		<header
+			className={`fixed w-full z-50 transition-all duration-300 ${
+				scrolled
+					? 'bg-gray-900/95 backdrop-blur-sm shadow-lg'
+					: 'bg-gradient-to-b from-gray-950/70 via-gray-950/50 to-transparent'
+			}`}
+		>
+			<div className='container mx-auto px-4'>
+				<div className='flex justify-between items-center py-3'>
+					<Link
+						to='/'
+						className='text-2xl font-bold text-white flex items-center'
+						onClick={closeMenu}
+					>
+						ТрейдАвто<span className='text-red-600'>-групп</span>
+					</Link>
+					<div className='flex items-center space-x-4'>
+						<div className='hidden md:flex items-center space-x-6 text-gray-300'>
+							<div className='flex items-center'>
+								<PhoneCall size={18} className='mr-2 text-red-500' />
+								{isLoadingGeneral ? (
+									<span className='text-sm lg:text-base'>Загрузка...</span>
+								) : (
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										className='hover:text-red-500 transition-colors text-sm lg:text-base'
+									>
+										{displayPhoneFormatted}{' '}
+										{/* Используем отформатированный номер для отображения */}
+									</a>
+								)}
+							</div>
+							<div className='flex items-center'>
+								<MapPin size={18} className='mr-2 text-red-500' />
+								{isLoadingGeneral ? (
+									<span className='text-sm lg:text-base'>Загрузка...</span>
+								) : (
+									<span className='text-sm lg:text-base'>
+										{displayAddress}
+									</span>
+								)}
+							</div>
+						</div>
+						<button
+							className='md:hidden text-white focus:outline-none'
+							onClick={toggleMenu}
+							aria-label='Toggle menu'
+						>
+							{isOpen ? <X size={24} /> : <Menu size={24} />}
+						</button>
+					</div>
+				</div>
+
+				<hr
+					className={`border-gray-700/50 hidden md:block ${
+						scrolled ? '' : 'opacity-0'
+					}`}
+				/>
+
+				<nav className='hidden md:flex items-center justify-start flex-wrap py-2 gap-x-3 lg:gap-x-4'>
+					{isLoadingServices && (
+						<div className='h-[36px] py-2 text-gray-400'>
+							Загрузка меню...
+						</div>
+					)}
+					{!isLoadingServices && navServices.length > 0 && (
+						<>
+							{navServices.map((service) => (
+								<Link
+									key={service.id}
+									to={`/services/${service.id}`}
+									className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
+								>
+									{service.title}
+								</Link>
+							))}
+						</>
+					)}
+					<Link
+						to='/gallery'
+						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
+					>
+						Наши работы
+					</Link>
+					<Link
+						to='/#cars-for-sale'
+						onClick={(e) => handleNavClick(e, '#cars-for-sale')}
+						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold flex items-center'
+					>
+						<Car size={18} className='mr-1.5 text-red-500' />
+						Авто на продажу
+					</Link>
+					<Link
+						to='/#contact'
+						onClick={(e) => handleNavClick(e, '#contact')}
+						className='text-gray-300 hover:text-red-500 transition-colors text-sm lg:text-base whitespace-nowrap py-1 px-1 font-semibold'
+					>
+						Контакты
+					</Link>
+				</nav>
+				{!isLoadingServices && navServices.length === 0 && (
+					<div className='hidden md:block h-[36px] py-2'></div>
+				)}
+			</div>
+
+			<div
+				className={`md:hidden fixed inset-0 bg-gray-900 z-40 transform transition-transform duration-300 ease-in-out ${
+					isOpen ? 'translate-x-0' : 'translate-x-full'
+				}`}
+			>
+				<button
+					className='absolute top-6 right-5 text-white focus:outline-none'
+					onClick={closeMenu}
+					aria-label='Close menu'
+				>
+					<X size={28} />
+				</button>
+				<div className='flex flex-col h-full overflow-y-auto py-20 px-4 space-y-4'>
+					<h3 className='text-xl font-semibold text-white border-b border-gray-700 pb-2'>
+						Услуги
+					</h3>
+					<div className='flex flex-col space-y-3 pl-2'>
+						{isLoadingServices && (
+							<p className='text-gray-400'>Загрузка услуг...</p>
+						)}
+						{navServices.map((service) => (
+							<Link
+								key={service.id}
+								to={`/services/${service.id}`}
+								className='block text-gray-300 hover:text-red-500 transition-colors text-lg'
+								onClick={closeMenu}
+							>
+								{service.title}
+							</Link>
+						))}
+					</div>
+					<Link
+						to='/gallery'
+						className='text-xl text-white hover:text-red-500 transition-colors pt-2 border-t border-gray-700 mt-4'
+						onClick={closeMenu}
+					>
+						Наши работы
+					</Link>
+					<Link
+						to='/#cars-for-sale'
+						onClick={(e) => handleNavClick(e, '#cars-for-sale')}
+						className='text-xl text-white hover:text-red-500 transition-colors pt-2 flex items-center'
+					>
+						<Car size={22} className='mr-2 text-red-500' />
+						Авто на продажу
+					</Link>
+					<Link
+						to='/#contact'
+						onClick={(e) => handleNavClick(e, '#contact')}
+						className='text-xl text-white hover:text-red-500 transition-colors pt-2'
+					>
+						Контакты
+					</Link>
+					<div className='mt-auto pt-6 border-t border-gray-700 space-y-4'>
+						{isLoadingGeneral ? (
+							<p className='text-gray-400'>Загрузка контактов...</p>
+						) : (
+							<>
+								<div className='flex items-center text-white'>
+									<PhoneCall size={20} className='mr-3 text-red-500' />
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										className='text-lg'
+									>
+										{displayPhoneFormatted}{' '}
+										{/* Используем отформатированный номер для отображения */}
+									</a>
+								</div>
+								<div className='flex items-center text-white'>
+									<Clock size={20} className='mr-3 text-red-500' />
+									<span className='text-lg'>10:00-22:00</span>
+								</div>
+								<div className='flex items-start text-white'>
+									<MapPin size={20} className='mr-3 text-red-500 mt-1' />
+									<span className='text-lg'>{displayAddress}</span>
+								</div>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+		</header>
+	);
+};
+
+export default Navbar;
+
+```
+
+## src/components/ServiceCard.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+
+interface ServiceCardProps {
+	id: string;
+	title: string;
+	description: string;
+	imageUrl: string;
+	index: number;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({
+	id,
+	title,
+	description,
+	imageUrl,
+	index,
+}) => {
+	// const isEven = index % 2 === 0; // Переменная isEven больше не используется в стилях
+
+	return (
+		<div
+			className={`relative overflow-hidden bg-gray-800 rounded-lg group transition-all duration-300 hover:shadow-[0_0_15px_rgba(220,38,38,0.3)] h-[300px] md:h-[400px]`}
+		>
+			{/* Background image with overlay */}
+			<div
+				className='absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110'
+				style={{ backgroundImage: `url(${imageUrl})` }}
+			/>
+			<div className='absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300'></div>
+
+			{/* Content */}
+			<div className='relative h-full flex flex-col justify-end p-6 z-10'>
+				<h3 className='text-2xl md:text-3xl font-bold text-white mb-3 group-hover:text-red-500 transition-colors duration-300'>
+					{title}
+				</h3>
+				{/* Добавлен класс text-base для увеличения шрифта описания */}
+				<p className='text-gray-300 mb-6 max-w-md text-lg'>
+					{description}
+				</p>
+				<Link
+					to={`/services/${id}`}
+					className='inline-flex items-center text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-md transition-colors duration-300 w-fit'
+				>
+					Подробнее
+					<ArrowRight size={18} className='ml-2' />
+				</Link>
+			</div>
+		</div>
+	);
+};
+
+export default ServiceCard;
+
+```
+
+## src/components/ServicesSection.tsx
+
+```tsx
+import React from 'react';
+import ServiceCard from './ServiceCard';
+import { TransformedService } from '../types/api'; // Импортируем TransformedService
+
+interface ServicesSectionProps {
+	services: TransformedService[]; // Используем TransformedService
+}
+
+const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) => {
+	return (
+		<section id='services' className='py-20 bg-gray-900'>
+			<div className='container mx-auto px-4'>
+				<div className='text-center mb-12'>
+					<h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
+						Наши услуги
+					</h2>
+					<p className='text-gray-400 max-w-2xl mx-auto'>
+						Мы предлагаем полный спектр услуг по ремонту и обслуживанию
+						автомобилей любых марок
+					</p>
+				</div>
+
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+					{services.map((service, index) => (
+						<ServiceCard
+							key={service.id} // service.id это слаг
+							id={service.id} // Передаем слаг для Link
+							title={service.title}
+							description={service.shortDescription}
+							imageUrl={service.imageUrl} // Уже полный URL
+							index={index}
+						/>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+};
+
+export default ServicesSection;
+
+```
+
+## src/components/StrapiRichTextRenderer.tsx
+
+```tsx
+import React from 'react';
+import { StrapiRichTextBlock } from '../types/api'; // Убедитесь, что этот тип импортируется или определен здесь
+
+interface StrapiRichTextRendererProps {
+	content: StrapiRichTextBlock[] | null | undefined;
+	// Можно добавить пропсы для кастомизации рендеринга определенных типов
+	// например, customParagraph?: (children: React.ReactNode, key: string) => React.ReactElement;
+}
+
+const renderTextNode = (node: any, index: number): React.ReactNode => {
+	let children = <>{node.text}</>;
+	if (node.bold) {
+		children = <strong key={`bold-${index}`}>{children}</strong>;
+	}
+	if (node.italic) {
+		children = <em key={`italic-${index}`}>{children}</em>;
+	}
+	if (node.underline) {
+		children = <u key={`underline-${index}`}>{children}</u>;
+	}
+	if (node.strikethrough) {
+		children = <s key={`strike-${index}`}>{children}</s>;
+	}
+	if (node.code) {
+		children = <code key={`code-${index}`}>{children}</code>;
+	}
+	return children;
+};
+
+const StrapiRichTextRenderer: React.FC<StrapiRichTextRendererProps> = ({
+	content,
+}) => {
+	if (!content || !Array.isArray(content)) {
+		return null;
+	}
+
+	return (
+		<>
+			{content.map((block, index) => {
+				const blockKey = `block-${index}`;
+				switch (block.type) {
+					case 'paragraph':
+						return (
+							<p key={blockKey}>
+								{block.children.map((child, childIndex) => (
+									<React.Fragment key={childIndex}>
+										{renderTextNode(child, childIndex)}
+									</React.Fragment>
+								))}
+							</p>
+						);
+					case 'list':
+						const ListTag = block.format === 'ordered' ? 'ol' : 'ul';
+						return (
+							<ListTag key={blockKey}>
+								{block.children.map((listItem, listItemIndex) => (
+									<li key={`${blockKey}-li-${listItemIndex}`}>
+										{listItem.children.map(
+											(child: any, childIndex: number) => (
+												<React.Fragment key={childIndex}>
+													{renderTextNode(child, childIndex)}
+												</React.Fragment>
+											)
+										)}
+									</li>
+								))}
+							</ListTag>
+						);
+					case 'heading':
+						const HeadingTag = `h${
+							block.level || 1
+						}` as keyof JSX.IntrinsicElements;
+						return (
+							<HeadingTag key={blockKey}>
+								{block.children.map((child, childIndex) => (
+									<React.Fragment key={childIndex}>
+										{renderTextNode(child, childIndex)}
+									</React.Fragment>
+								))}
+							</HeadingTag>
+						);
+					// Добавьте обработку других типов блоков здесь (image, quote, code-block, link и т.д.)
+					// case 'image':
+					//   // block.image.url, block.image.alternativeText
+					//   return <img key={blockKey} src={getStrapiURL(block.image.url)} alt={block.image.alternativeText || ''} />;
+					default:
+						// Для неизвестных блоков можно выводить их JSON или ничего
+						// console.warn('Unknown Strapi Rich Text block type:', block.type, block);
+						return null;
+				}
+			})}
+		</>
+	);
+};
+
+export default StrapiRichTextRenderer;
+
+```
+
+## src/data/imageData.ts
+
+```ts
+// --- Остальной код galleryItemsData остается без изменений ---
+export interface GalleryItemBase {
+	id: number | string;
+	title: string;
+	description: string;
+}
+
+export interface GallerySingleItem extends GalleryItemBase {
+	type: 'single';
+	imageUrl: string;
+}
+
+export interface GalleryBeforeAfterItem extends GalleryItemBase {
+	type: 'beforeAfter';
+	beforeImage: string;
+	afterImage: string;
+}
+
+export type GalleryItem = GallerySingleItem | GalleryBeforeAfterItem;
+
+export const galleryItemsData: GalleryItem[] = [
+	{
+		id: 1,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/190574/pexels-photo-190574.jpeg',
+		title: 'Ремонт двигателя',
+		description: 'Капитальный ремонт двигателя Toyota',
+	},
+	{
+		id: 'ba1',
+		type: 'beforeAfter',
+		title: 'Восстановление кузова',
+		description: 'Полное восстановление после ДТП',
+		beforeImage:
+			'https://images.pexels.com/photos/9626967/pexels-photo-9626967.jpeg',
+		afterImage:
+			'https://images.pexels.com/photos/3778769/pexels-photo-3778769.jpeg',
+	},
+	{
+		id: 2,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/244553/pexels-photo-244553.jpeg',
+		title: 'Покраска автомобиля',
+		description: 'Полная покраска Mercedes-Benz',
+	},
+	{
+		id: 'ba2',
+		type: 'beforeAfter',
+		title: 'Полировка кузова',
+		description: 'Устранение царапин и придание блеска',
+		beforeImage:
+			'https://images.pexels.com/photos/9800012/pexels-photo-9800012.jpeg',
+		afterImage:
+			'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg',
+	},
+	{
+		id: 3,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/3807500/pexels-photo-3807500.jpeg',
+		title: 'Ремонт подвески',
+		description: 'Замена амортизаторов и пружин',
+	},
+	{
+		id: 4,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/9607184/pexels-photo-9607184.jpeg',
+		title: 'Детейлинг салона',
+		description: 'Химчистка и восстановление пластика',
+	},
+	{
+		id: 5,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/4489731/pexels-photo-4489731.jpeg',
+		title: 'Сварочные работы',
+		description: 'Восстановление порогов и днища',
+	},
+	{
+		id: 6,
+		type: 'single',
+		imageUrl:
+			'https://images.pexels.com/photos/13009432/pexels-photo-13009432.jpeg',
+		title: 'Диагностика',
+		description: 'Компьютерная диагностика систем',
+	},
+];
+
+```
+
+## src/data/servicesData.ts
+
+```ts
+// src/data/servicesData.ts
+
+export interface Service {
+	id: string;
+	title: string;
+	shortDescription: string; // Описание стало короче
+	fullDescription: string;
+	imageUrl: string;
+	services: string[];
+}
+
+export const servicesData: Service[] = [
+	{
+		id: 'why-choose-us',
+		title: 'Почему выбирают нас',
+		shortDescription:
+			'Полный цикл обслуживания: от заказа запчастей до установки. Ваше удобство - наш приоритет.', // Сокращено
+		fullDescription:
+			'Мы стремимся сделать процесс обслуживания вашего автомобиля максимально комфортным и беззаботным. Наши специалисты берут на себя все заботы - от заказа необходимых запчастей до их установки. Все, что требуется от вас - это предоставить автомобиль и сохранять хорошее настроение.',
+		imageUrl:
+			'https://images.pexels.com/photos/3807133/pexels-photo-3807133.jpeg',
+		services: [
+			'Комплексный подход к обслуживанию',
+			'Заказ и доставка запчастей',
+			'Профессиональная установка',
+			'Гарантия на все виды работ',
+			'Прозрачное ценообразование',
+		],
+	},
+	{
+		id: 'mechanical-work',
+		title: 'Слесарные работы',
+		shortDescription:
+			'Комплексный ремонт и ТО: от ДВС до ходовой. Гарантия безупречной работы механики.', // Сокращено
+		fullDescription:
+			'Наши квалифицированные механики проводят полный спектр слесарных работ по обслуживанию и ремонту автомобилей любых марок. Мы специализируемся на капитальном ремонте двигателей, коробок передач, ходовой части, а также на плановом техническом обслуживании. Все работы выполняются с использованием современного оборудования и качественных материалов.',
+		imageUrl:
+			'https://images.pexels.com/photos/3806249/pexels-photo-3806249.jpeg',
+		services: [
+			'Капитальный ремонт ДВС',
+			'Ремонт ГБЦ',
+			'Капитальный ремонт механических коробок',
+			'Обслуживание ходовой части',
+			'Ремонт мостов',
+			'Ремонт кардана',
+			'Ремонт рулевых реек',
+			'Восстановление стоек амортизаторов',
+			'Замена ступичных подшипников',
+			'Замена колодок',
+			'Полное ТО',
+			'Замена масла в ДВС',
+			'Замена масла в КПП',
+			'Замена масла в системе ГУР',
+			'Промывка системы',
+			'Шиномонтаж',
+			'Замена радиатора',
+			'Замена радиатора печки',
+			'Замена ГРМ',
+			'Восстановление генераторов',
+			'Ремонт топливной системы',
+			'Замена бензонасоса',
+			'Промывка топливного бака',
+			'Шлифовка/расточка ГБЦ и Блоков',
+			'Восстановление и установка выхлопных систем',
+			'Замена всех технических жидкостей',
+		],
+	},
+	{
+		id: 'diagnostics',
+		title: 'Диагностика',
+		shortDescription:
+			'Точная диагностика всех систем авто на современном оборудовании. Раннее выявление неисправностей.', // Сокращено
+		fullDescription:
+			'Мы предлагаем полный спектр диагностических услуг для выявления технических проблем вашего автомобиля. Используя современное компьютерное оборудование и профессиональные инструменты, наши специалисты проводят тщательную проверку всех систем и узлов, что позволяет своевременно обнаружить и устранить неисправности.',
+		imageUrl:
+			'https://images.pexels.com/photos/3807231/pexels-photo-3807231.jpeg',
+		services: [
+			'Диагностика электронная (компьютерная)',
+			'Диагностика механическая',
+			'Комплексная диагностика (Полный осмотр авто)',
+			'Измерение компрессии в цилиндре',
+			'Проверка эндоскопом',
+			'Диагностика фар',
+			'Диагностика проводки',
+		],
+	},
+	{
+		id: 'electrical',
+		title: 'Электрика',
+		shortDescription:
+			'Ремонт автоэлектрики любой сложности: от проводки до установки доп. оборудования.', // Сокращено
+		fullDescription:
+			'Электрические системы современных автомобилей становятся все сложнее, и их обслуживание требует особых знаний и оборудования. Наши специалисты по автоэлектрике проводят диагностику и ремонт электрооборудования, устанавливают дополнительное оборудование и восстанавливают электрические цепи с высоким качеством исполнения.',
+		imageUrl:
+			'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg',
+		services: [
+			'Восстановление и замена проводки',
+			'Ремонт фар',
+			'Ремонт приборной панели',
+			'Установка музыки (колонки, настройка магнитофона, савбуфер, усилитель и т.д.)',
+			'Установка сигнализации',
+			'Замена лампочек (В фарах, приборной панели, на торпедо)',
+			'Восстановление систем SRS (восстановление полной системы безопаности подушек, ремней)',
+		],
+	},
+	{
+		id: 'painting',
+		title: 'Покраска',
+		shortDescription:
+			'Качественная покраска и кузовной ремонт. Восстановление вида и защита от коррозии.', // Сокращено
+		fullDescription:
+			'Наш кузовной цех оснащен современным оборудованием для качественного восстановления и покраски автомобилей. Мы используем профессиональные материалы и соблюдаем все технологические процессы, чтобы обеспечить идеальное покрытие и долговечность результата. От небольшого ремонта до полной перекраски - мы гарантируем высочайшее качество работы.',
+		imageUrl:
+			'https://images.pexels.com/photos/4480505/pexels-photo-4480505.jpeg',
+		services: [
+			'Полный окрас авто',
+			'Частичный окрас авто',
+			'Восстановление бамперов',
+			'Восстановление геометрии',
+			'Восстановление/выставление зазоров',
+			'Покрас подкапотного пространства',
+			'Восстановление кабин грузовых авто (Газели, Hyundai Porter и т.д.)',
+		],
+	},
+	{
+		id: 'welding',
+		title: 'Сварочные работы',
+		shortDescription:
+			'Сварка любой сложности для восстановления кузова и конструкций. Опытные мастера.', // Сокращено
+		fullDescription:
+			'Сварочные работы являются важной частью кузовного ремонта автомобилей. Наши мастера с многолетним опытом проводят работы любой сложности по восстановлению кузова, используя профессиональное сварочное оборудование. Мы гарантируем высокое качество сварных швов и структурную целостность отремонтированных элементов.',
+		imageUrl:
+			'https://images.pexels.com/photos/3846249/pexels-photo-3846249.jpeg',
+		services: [
+			'Переварка порогов',
+			'Переварка дна',
+			'Переварка арок',
+			'Переварка лонжеронов',
+			'Переварка балки',
+			'Переварка глушителей',
+			'Переварка крыши',
+			'Переварка телевизоров',
+		],
+	},
+	{
+		id: 'detailing',
+		title: 'Детейлинг',
+		shortDescription:
+			'Детейлинг для идеального вида и защиты вашего авто. Полировка, химчистка, покрытия.', // Сокращено
+		fullDescription:
+			'Детейлинг - это комплекс процедур по тщательному уходу за автомобилем, направленный на улучшение его внешнего вида и защиту. Мы предлагаем услуги по полировке кузова, химчистке салона, тонировке стекол, перетяжке элементов салона и нанесению защитных покрытий. Наши специалисты используют только профессиональные материалы и оборудование для достижения наилучшего результата.',
+		imageUrl:
+			'https://images.pexels.com/photos/6794815/pexels-photo-6794815.jpeg',
+		services: [
+			'Предпродажная подготовка (легкая полировка кузова и легкая химчистка салона)',
+			'Полная полировка кузова',
+			'Тонировка стекол любой сложности',
+			'Перешивка руля и салона',
+			'Перешивка ручек АКПП',
+			'Перешивка подлокотников',
+			'Обтягивание авто пленкой',
+		],
+	},
+	{
+		id: 'spare-parts',
+		title: 'Запчасти',
+		shortDescription:
+			'Заказ новых и контрактных запчастей по выгодным ценам с быстрой доставкой.', // Сокращено
+		fullDescription:
+			'Мы предлагаем широкий ассортимент оригинальных и альтернативных запчастей для автомобилей всех марок. Благодаря прямому сотрудничеству с крупными дистрибьюторами, мы можем предложить конкурентные цены и быструю доставку. Наши специалисты помогут вам подобрать необходимые детали и расходные материалы, полностью соответствующие техническим требованиям вашего автомобиля.',
+		imageUrl:
+			'https://images.pexels.com/photos/9226098/pexels-photo-9226098.jpeg',
+		services: [
+			'Заказ новых запчастей',
+			'Поставка контрактных запчастей',
+			'Доставка запчастей в короткие сроки',
+			'Подбор аналогов по выгодным ценам',
+			'Поставка оригинальных технических жидкостей',
+		],
+	},
+];
+
+```
+
+## src/img/img_1.webp
+
+```webp
+[Binary file content not included]
+```
+
+## src/img/img_2.png
+
+```png
+[File content not included. Size (1190561 bytes) exceeds the maximum allowed size (1048576 bytes)]
+```
+
+## src/index.css
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+```
+
+## src/lib/graphql.ts
+
+```ts
+import { GraphQLClient } from 'graphql-request';
+
+export const API_URL = 'http://localhost:1337'; // Замените, если ваш API на другом URL
+export const GRAPHQL_ENDPOINT = `${API_URL}/graphql`;
+const API_TOKEN =
+	'2ed8d43c7c2dc13fcfa7a2c1298eef50f46ddeabb807465e90769f60637f15ea2597d96eab1e23a9b80aa0770b816601579a86bb22c73a348fba3187a281faf9a44afd4927bd51a77e45e048c00919485792de5ddb07004e4a2af40f36b93a9e51520dd338f3dbf49e25a3d36bc80aac68951136c4ec194c11f2343118a75684';
+
+export const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINT, {
+	headers: {
+		authorization: `Bearer ${API_TOKEN}`,
+	},
+});
+
+// Вспомогательная функция для получения полного URL изображения
+export const getStrapiURL = (path = '') => {
+	if (!path) {
+		// Можно вернуть URL для плейсхолдера по умолчанию
+		return '/placeholder.png'; // Убедитесь, что у вас есть такой файл в public или обработайте иначе
+	}
+	if (path.startsWith('http') || path.startsWith('//')) {
+		return path; // Если URL уже абсолютный
+	}
+	return `${API_URL}${path}`;
+};
+
+```
+
+## src/lib/queries.ts
+
+```ts
+import { gql } from 'graphql-request';
+
+// Фрагмент для типичных полей изображения
+// Теперь он применяется к типу UploadFile и запрашивает поля напрямую
+const IMAGE_FRAGMENT = gql`
+	fragment ImageFragment on UploadFile {
+		documentId # ID самого файла, если нужно
+		url
+		alternativeText
+		width
+		height
+	}
+`;
+
+// Запрос данных для Hero
+export const GET_HERO_DATA_QUERY = gql`
+	query GetHeroData {
+		hero {
+			# documentId # Необязательно для синглтона, если не нужен ID
+			title
+			secondTitle
+			description
+		}
+	}
+`;
+
+// Запрос данных для "Почему выбирают нас"
+export const GET_WHY_CHOOSE_US_DATA_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetWhyChooseUsData {
+		whyChooseUs {
+			# documentId
+			title
+			# shortDescription # Если понадобится, можно раскомментировать
+			fullDescription # JSON
+			imageUrl {
+				...ImageFragment
+			}
+		}
+	}
+`;
+
+// Запрос всех услуг
+export const GET_SERVICES_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetServices {
+		services(pagination: { limit: 100 }, sort: "service_id:asc") {
+			documentId
+			title
+			service_id
+			shortDescription
+			fullDescription # Это JSON поле, обработаем его при трансформации
+			image {
+				...ImageFragment
+			}
+		}
+	}
+`;
+
+// Запрос одной услуги по ее service_id (слагу)
+export const GET_SERVICE_BY_SLUG_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetServiceBySlug($serviceIdSlug: String!) {
+		services(
+			filters: { service_id: { eq: $serviceIdSlug } }
+			pagination: { limit: 1 }
+		) {
+			documentId
+			title
+			service_id
+			shortDescription
+			fullDescription # JSON
+			image {
+				...ImageFragment
+			}
+		}
+	}
+`;
+
+// Запрос примеров работ для GalleryPreview и страницы /gallery
+export const GET_WORK_EXAMPLES_FOR_PREVIEW_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetWorkExamplesForPreview {
+		workExamples(pagination: { limit: 100 }, sort: "completionDate:desc") {
+			documentId
+			title
+			description
+			mainPreviewImage {
+				...ImageFragment
+			}
+			gallery_items(pagination: { limit: 1 }) {
+				documentId
+				title
+				description
+				type
+				imageUrl {
+					...ImageFragment
+				}
+				beforeImage {
+					...ImageFragment
+				}
+				afterImage {
+					...ImageFragment
+				}
+			}
+		}
+	}
+`;
+
+// Запрос одного примера работы со всеми его элементами галереи для страницы /work-examples/:id
+export const GET_WORK_EXAMPLE_BY_ID_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetWorkExampleById($workExampleDocumentId: ID!) {
+		workExample(documentId: $workExampleDocumentId) {
+			documentId
+			title
+			description # JSON
+			mainPreviewImage {
+				...ImageFragment
+			}
+			completionDate
+			gallery_items(pagination: { limit: 50 }) {
+				documentId
+				title
+				description
+				type
+				imageUrl {
+					...ImageFragment
+				}
+				beforeImage {
+					...ImageFragment
+				}
+				afterImage {
+					...ImageFragment
+				}
+			}
+		}
+	}
+`;
+
+// Запрос списка автомобилей для превью (секция "Авто на продажу")
+export const GET_CARS_FOR_SALE_PREVIEW_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetCarsForSalePreview {
+		cars(pagination: { limit: 100 }, sort: "createdAt:desc") {
+			# Сортировка по дате создания, можно изменить
+			documentId
+			title
+			cost
+			images(pagination: { limit: 1 }) {
+				# Запрашиваем только первое изображение
+				...ImageFragment
+			}
+		}
+	}
+`;
+
+// Запрос одного автомобиля по его documentId для страницы /cars/:id
+export const GET_CAR_BY_ID_QUERY = gql`
+	${IMAGE_FRAGMENT}
+	query GetCarById($carDocumentId: ID!) {
+		car(documentId: $carDocumentId) {
+			documentId
+			title
+			description # JSON
+			cost
+			images(pagination: { limit: 20 }) {
+				# Запрашиваем все изображения (до 20)
+				...ImageFragment
+			}
+		}
+	}
+`;
+
+// Запрос общих настроек сайта (телефон, адрес)
+export const GET_GENERAL_DATA_QUERY = gql`
+	query GetGeneralData {
+		general {
+			phone
+			address
+		}
+	}
+`;
+
+```
+
+## src/lib/utils.ts
+
+```ts
+// src/lib/utils.ts
+
+/**
+ * Форматирует номер телефона для отображения.
+ * Пример: +7 (965) 511-85-85
+ * @param phone - Номер телефона в строковом формате.
+ * @returns Отформатированный номер телефона или исходная строка, если форматирование невозможно.
+ */
+export const formatDisplayPhoneNumber = (
+	phone: string | undefined | null
+): string => {
+	if (!phone) return '';
+
+	// Удаляем все нецифровые символы, кроме начального '+'
+	let cleaned = phone.replace(/[^\d+]/g, '');
+
+	// Если номер начинается с '8' и имеет 11 цифр (российский формат без +), заменяем '8' на '+7'
+	if (cleaned.startsWith('8') && cleaned.length === 11) {
+		cleaned = '+7' + cleaned.substring(1);
+	}
+	// Если номер начинается с '7' (без +) и имеет 11 цифр, добавляем '+'
+	else if (
+		cleaned.startsWith('7') &&
+		cleaned.length === 11 &&
+		!cleaned.startsWith('+')
+	) {
+		cleaned = '+' + cleaned;
+	}
+	// Если номер состоит из 10 цифр (без кода страны), предполагаем, что это российский номер и добавляем '+7'
+	else if (cleaned.length === 10 && /^\d+$/.test(cleaned)) {
+		cleaned = '+7' + cleaned;
+	}
+
+	// Применяем маску +X (XXX) XXX-XX-XX или +XX (XXX) XXX-XX-XX и т.д.
+	const match = cleaned.match(/^(\+\d{1,3})(\d{3})(\d{3})(\d{2})(\d{2})$/);
+
+	if (match) {
+		return `${match[1]} (${match[2]}) ${match[3]}-${match[4]}-${match[5]}`;
+	}
+
+	// Если не подошло под основную маску, возвращаем "очищенный" или исходный номер
+	return cleaned || phone;
+};
+
+/**
+ * Форматирует номер телефона для использования в ссылке tel:
+ * Пример: +79655118585
+ * @param phone - Номер телефона в строковом формате.
+ * @returns Номер телефона, пригодный для tel: ссылок.
+ */
+export const formatPhoneNumberForTelLink = (
+	phone: string | undefined | null
+): string => {
+	if (!phone) return '';
+	let cleaned = phone.replace(/[^\d+]/g, ''); // Оставляем только цифры и +
+
+	// Если номер начинается с '8' и имеет 11 цифр, заменяем '8' на '+7'
+	if (cleaned.startsWith('8') && cleaned.length === 11) {
+		cleaned = '+7' + cleaned.substring(1);
+	}
+	// Если номер начинается с '7' (без +) и имеет 11 цифр, добавляем '+'
+	else if (
+		cleaned.startsWith('7') &&
+		cleaned.length === 11 &&
+		!cleaned.startsWith('+')
+	) {
+		cleaned = '+' + cleaned;
+	}
+	// Если номер состоит из 10 цифр (без кода страны), предполагаем, что это российский номер и добавляем '+7'
+	else if (cleaned.length === 10 && /^\d+$/.test(cleaned)) {
+		cleaned = '+7' + cleaned;
+	}
+	// Убедимся что номер начинается с + если это не так и он достаточно длинный
+	else if (!cleaned.startsWith('+') && cleaned.length >= 10) {
+		cleaned = '+' + cleaned;
+	}
+	return cleaned;
+};
+
+```
+
+## src/lib/ymaps.ts
+
+```ts
+// src/lib/ymaps.ts
+import React from 'react';
+import ReactDOM from 'react-dom'; // Используем ReactDOM для bindTo
+
+// Глобальная переменная ymaps3 должна быть доступна после подключения скрипта в index.html
+// @ts-ignore ymaps3 это глобальная переменная из скрипта Яндекс.Карт
+const ymaps3 = window.ymaps3;
+
+// Ожидаем загрузки API и модуля reactify
+// Используем Promise.all для параллельной загрузки
+const [ymaps3React] = await Promise.all([
+	ymaps3.import('@yandex/ymaps3-reactify'), // Импортируем reactify модуль
+	ymaps3.ready, // Дожидаемся полной готовности API
+]);
+
+// Создаем reactify инстанс, привязанный к вашим React и ReactDOM
+// bindTo(React, ReactDOM) - это важно!
+const reactify = ymaps3React.reactify.bindTo(React, ReactDOM);
+
+// Экспортируем необходимые React-компоненты карты
+// module(ymaps3) преобразует нативные классы ymaps3 в React-компоненты
+export const {
+	YMap,
+	YMapDefaultSchemeLayer,
+	YMapDefaultFeaturesLayer,
+	YMapMarker,
+	YMapControls, // Если нужны стандартные контролы
+	YMapZoomControl, // Пример контрола зума
+	YMapGeolocationControl, // Пример контрола геолокации
+	// Добавьте другие компоненты, которые вам нужны, например, YMapListener, YMapFeature, etc.
+} = reactify.module(ymaps3);
+
+// Также экспортируем сам reactify, если он понадобится для useDefault и т.д.
+export { reactify };
+
+// Вы можете также экспортировать типы, если они нужны в других местах
+// import type { YMapLocationRequest } from 'ymaps3';
+// export type { YMapLocationRequest };
+
+```
+
+## src/main.tsx
+
+```tsx
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './App';
+import Home from './pages/Home';
+import ServicePage from './pages/ServicePage';
+import Gallery from './pages/Gallery';
+import WorkExamplePage from './pages/WorkExamplePage';
+import CarPage from './pages/CarPage'; // Новая страница автомобиля
+import './index.css';
+
+const queryClient = new QueryClient();
+
+const routes = [
+	{
+		path: '/',
+		element: <App />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: 'gallery',
+				element: <Gallery />,
+			},
+			{
+				path: 'work-examples/:workExampleId',
+				element: <WorkExamplePage />,
+			},
+			{
+				path: 'services/:serviceSlug',
+				element: <ServicePage />,
+			},
+			{
+				path: 'cars/:carId', // Новый маршрут для страницы автомобиля
+				element: <CarPage />,
+			},
+		],
+	},
+];
+
+const router = createBrowserRouter(routes);
+
+createRoot(document.getElementById('root')!).render(
+	<StrictMode>
+		<QueryClientProvider client={queryClient}>
+			<RouterProvider router={router} />
+		</QueryClientProvider>
+	</StrictMode>
+);
+
+```
+
+## src/pages/CarPage.tsx
+
+```tsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+	ArrowLeft,
+	PhoneCall,
+	MessageCircle,
+	ChevronLeft,
+	ChevronRight,
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchCarById, fetchGeneralData } from '../services/apiService';
+import {
+	TransformedCarPageData,
+	TransformedGeneralData,
+} from '../types/api';
+import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import Contact from '../components/Contact';
+import { formatPhoneNumberForTelLink } from '../lib/utils'; // Импортируем форматер для tel: ссылок
+
+const CarPage: React.FC = () => {
+	const navigate = useNavigate();
+	const { carId } = useParams<{ carId: string }>();
+
+	const {
+		data: car,
+		isLoading: isLoadingCar,
+		error: errorCar,
+	} = useQuery<TransformedCarPageData | null>({
+		queryKey: ['carPageData', carId],
+		queryFn: () => {
+			if (!carId) return Promise.resolve(null);
+			return fetchCarById(carId);
+		},
+		enabled: !!carId,
+	});
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+	useEffect(() => {
+		setCurrentImageIndex(0);
+	}, [carId]);
+
+	const mainImage = car?.images[currentImageIndex]?.url;
+	const totalImages = car?.images?.length || 0;
+
+	const goToNextImage = useCallback(() => {
+		if (totalImages > 0) {
+			setCurrentImageIndex((prevIndex) => (prevIndex + 1) % totalImages);
+		}
+	}, [totalImages]);
+
+	const goToPrevImage = useCallback(() => {
+		if (totalImages > 0) {
+			setCurrentImageIndex(
+				(prevIndex) => (prevIndex - 1 + totalImages) % totalImages
+			);
+		}
+	}, [totalImages]);
+
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (!car || totalImages <= 1) return;
+
+			if (event.key === 'ArrowRight') {
+				goToNextImage();
+			} else if (event.key === 'ArrowLeft') {
+				goToPrevImage();
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [car, totalImages, goToNextImage, goToPrevImage]);
+
+	if (isLoadingCar) {
+		return (
+			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
+				Загрузка информации об автомобиле...
+			</div>
+		);
+	}
+
+	if (errorCar || !car) {
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					{errorCar ? 'Ошибка загрузки' : 'Автомобиль не найден'}
+				</h2>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	const handleThumbnailClick = (index: number) => {
+		setCurrentImageIndex(index);
+	};
+
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone); // Форматируем для tel: ссылки
+
+	const whatsAppNumber = generalData?.whatsappPhone || '79655118585'; // generalData.whatsappPhone уже отформатирован в apiService
+	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+
+	return (
+		<div className='pt-16 md:pt-24 bg-gray-900 text-white'>
+			<div className='container mx-auto px-4 py-12 md:py-16'>
+				<button
+					onClick={() => navigate(-1)}
+					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
+				>
+					<ArrowLeft size={20} className='mr-2' />
+					Назад
+				</button>
+
+				<div className='grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12'>
+					<div className='lg:col-span-3'>
+						<div className='relative aspect-w-16 aspect-h-10 md:aspect-h-9 bg-gray-800 rounded-lg overflow-hidden shadow-xl mb-4'>
+							{mainImage ? (
+								<img
+									src={mainImage}
+									alt={`${car.title} - изображение ${
+										currentImageIndex + 1
+									}`}
+									className='w-full h-full object-contain'
+								/>
+							) : (
+								<div className='w-full h-full flex items-center justify-center text-gray-500'>
+									{totalImages > 0 ? 'Загрузка...' : 'Нет изображений'}
+								</div>
+							)}
+
+							{totalImages > 1 && (
+								<>
+									<button
+										onClick={goToPrevImage}
+										className='absolute top-1/2 left-2 md:left-4 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10'
+										aria-label='Предыдущее изображение'
+									>
+										<ChevronLeft size={28} />
+									</button>
+									<button
+										onClick={goToNextImage}
+										className='absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10'
+										aria-label='Следующее изображение'
+									>
+										<ChevronRight size={28} />
+									</button>
+								</>
+							)}
+						</div>
+						{totalImages > 1 && (
+							<div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3'>
+								{car.images.map((image, index) => (
+									<button
+										key={image.url + index}
+										onClick={() => handleThumbnailClick(index)}
+										className={`aspect-w-1 aspect-h-1 bg-gray-800 rounded overflow-hidden cursor-pointer transition-opacity hover:opacity-80
+                                        ${
+																					index === currentImageIndex
+																						? 'ring-2 ring-red-500 opacity-100'
+																						: 'opacity-60'
+																				}`}
+										aria-label={`Показать изображение ${index + 1}`}
+									>
+										<img
+											src={image.url}
+											alt={`${car.title} - миниатюра ${index + 1}`}
+											className='w-full h-full object-cover'
+										/>
+									</button>
+								))}
+							</div>
+						)}
+					</div>
+
+					<div className='lg:col-span-2'>
+						<h1 className='text-3xl md:text-4xl font-bold text-white mb-3'>
+							{car.title}
+						</h1>
+						<p className='text-3xl md:text-4xl font-bold text-red-500 mb-6'>
+							{car.cost}
+						</p>
+
+						{isLoadingGeneral ? (
+							<div className='space-y-4 mb-8'>
+								<div className='w-full flex items-center justify-center bg-red-600 text-white font-semibold py-3 px-6 rounded-md opacity-50'>
+									Загрузка...
+								</div>
+								<div className='w-full flex items-center justify-center bg-green-600 text-white font-semibold py-3 px-6 rounded-md opacity-50'>
+									Загрузка...
+								</div>
+							</div>
+						) : (
+							<div className='space-y-4 mb-8'>
+								<a
+									href={`tel:${telLinkPhone}`} // Используем отформатированный номер для tel: ссылки
+									className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300'
+								>
+									<PhoneCall size={20} className='mr-2' />
+									Позвонить
+								</a>
+								<a
+									href={whatsAppLink}
+									target='_blank'
+									rel='noopener noreferrer'
+									className='w-full flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300'
+								>
+									<MessageCircle size={20} className='mr-2' />
+									Написать в WhatsApp
+								</a>
+							</div>
+						)}
+
+						<div className='prose prose-invert max-w-none text-gray-300 text-lg'>
+							<h2 className='text-2xl font-semibold text-white mb-3'>
+								Описание
+							</h2>
+							{car.descriptionObject &&
+							car.descriptionObject.length > 0 ? (
+								<StrapiRichTextRenderer content={car.descriptionObject} />
+							) : (
+								<p>Подробное описание отсутствует.</p>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+			<Contact />
+		</div>
+	);
+};
+
+export default CarPage;
+
+```
+
+## src/pages/Gallery.tsx
+
+```tsx
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWorkExamplesForPreview } from '../services/apiService'; // Та же функция, что и для GalleryPreview
+import { TransformedWorkExamplePreviewItem } from '../types/api';
+import ImageCompare from '../components/ImageCompare'; // Для отображения карточек
+
+const Gallery = () => {
+	const navigate = useNavigate();
+	// Используем тот же запрос, что и для GalleryPreview, но отобразим все элементы
+	const {
+		data: workExamples,
+		isLoading,
+		error,
+	} = useQuery<TransformedWorkExamplePreviewItem[]>({
+		queryKey: ['workExamplesPreview'], // Можно использовать тот же ключ, т.к. данные идентичны
+		queryFn: fetchWorkExamplesForPreview,
+	});
+
+	if (isLoading) {
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-white flex justify-center items-center'>
+				Загрузка галереи работ...
+			</div>
+		);
+	}
+
+	if (error || !workExamples) {
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-red-500 flex justify-center items-center'>
+				Ошибка загрузки галереи работ.
+			</div>
+		);
+	}
+
+	return (
+		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
+			<div className='container mx-auto px-4 py-16'>
+				<button
+					onClick={() => navigate('/')}
+					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
+				>
+					<ArrowLeft size={20} className='mr-2' />
+					Назад на главную
+				</button>
+
+				<h1 className='text-4xl font-bold text-white mb-6'>
+					Галерея наших работ
+				</h1>
+				<p className='text-gray-300 mb-12 max-w-3xl'>
+					Здесь вы можете увидеть примеры наших работ. Кликните на любую
+					карточку, чтобы посмотреть все фотографии этого проекта.
+				</p>
+
+				{workExamples.length === 0 && !isLoading && (
+					<p className='text-center text-gray-400'>
+						Примеров работ пока нет.
+					</p>
+				)}
+
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10'>
+					{workExamples.map((item) => (
+						<div
+							key={item.workExampleId + (item.id || '')}
+							className='group'
+						>
+							<Link to={`/work-examples/${item.workExampleId}`}>
+								<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800 cursor-pointer'>
+									{item.type === 'single' ? (
+										<>
+											<img
+												src={item.imageUrl}
+												alt={item.title}
+												className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+												loading='lazy'
+											/>
+											<div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none'>
+												<svg
+													xmlns='http://www.w3.org/2000/svg'
+													fill='none'
+													viewBox='0 0 24 24'
+													strokeWidth={1.5}
+													stroke='white'
+													className='w-12 h-12'
+												>
+													<path
+														strokeLinecap='round'
+														strokeLinejoin='round'
+														d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'
+													/>
+												</svg>
+											</div>
+										</>
+									) : (
+										<ImageCompare
+											beforeImage={item.beforeImage}
+											afterImage={item.afterImage}
+											altBefore={`До - ${item.title}`}
+											altAfter={`После - ${item.title}`}
+										/>
+									)}
+								</div>
+							</Link>
+							<div>
+								<h4 className='text-lg font-semibold text-white mb-1'>
+									<Link
+										to={`/work-examples/${item.workExampleId}`}
+										className='hover:text-red-500'
+									>
+										{item.originalTitle}
+									</Link>
+									{item.type === 'beforeAfter' && (
+										<span className='text-sm text-gray-400 ml-2'>
+											(До/После)
+										</span>
+									)}
+								</h4>
+								<p className='text-gray-300 text-sm'>{item.description}</p>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+			{/* Модальное окно удалено отсюда, оно будет на странице WorkExamplePage */}
+		</div>
+	);
+};
+
+export default Gallery;
+
+```
+
+## src/pages/Home.tsx
+
+```tsx
+import React from 'react';
+import Hero from '../components/Hero';
+import GalleryPreview from '../components/GalleryPreview';
+import Contact from '../components/Contact';
+import ServicesSection from '../components/ServicesSection';
+import CarsForSaleSection from '../components/CarsForSaleSection'; // Новый импорт
+import { useQuery } from '@tanstack/react-query';
+import {
+	fetchServices,
+	fetchWhyChooseUsData,
+} from '../services/apiService';
+import {
+	TransformedService,
+	TransformedWhyChooseUsData,
+} from '../types/api';
+import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+
+const Home = () => {
+	const {
+		data: servicesData,
+		isLoading: isLoadingServices,
+		error: errorServices,
+	} = useQuery<TransformedService[]>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
+
+	const {
+		data: whyChooseUsData,
+		isLoading: isLoadingWhyChooseUs,
+		error: errorWhyChooseUs,
+	} = useQuery<TransformedWhyChooseUsData | null>({
+		queryKey: ['whyChooseUsData'],
+		queryFn: fetchWhyChooseUsData,
+	});
+
+	if (isLoadingServices || isLoadingWhyChooseUs) {
+		return (
+			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center'>
+				Загрузка данных...
+			</div>
+		);
+	}
+
+	if (errorServices || errorWhyChooseUs) {
+		console.error('Ошибка загрузки услуг:', errorServices);
+		console.error(
+			'Ошибка загрузки данных "Почему выбирают нас":',
+			errorWhyChooseUs
+		);
+		return (
+			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center'>
+				Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+			</div>
+		);
+	}
+
+	const actualServices = servicesData || [];
+
+	return (
+		<div>
+			<Hero />
+			{whyChooseUsData && (
+				<section className='py-20 bg-gray-950'>
+					<div className='container mx-auto px-4'>
+						<div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
+							<div>
+								<h2 className='text-3xl md:text-4xl font-bold text-white mb-6'>
+									{whyChooseUsData.title}
+								</h2>
+								<div className='prose prose-invert max-w-none text-gray-300 text-lg mb-8'>
+									{whyChooseUsData.fullDescriptionObject && (
+										<StrapiRichTextRenderer
+											content={whyChooseUsData.fullDescriptionObject}
+										/>
+									)}
+								</div>
+							</div>
+							<div className='relative h-[400px] rounded-lg overflow-hidden shadow-lg'>
+								<img
+									src={whyChooseUsData.imageUrl}
+									alt={whyChooseUsData.title}
+									className='w-full h-full object-cover'
+									loading='lazy'
+								/>
+								<div className='absolute inset-0 bg-gradient-to-t from-black/70 to-transparent'></div>
+							</div>
+						</div>
+					</div>
+				</section>
+			)}
+			{actualServices.length > 0 && (
+				<ServicesSection services={actualServices} />
+			)}
+			<GalleryPreview />
+			<CarsForSaleSection /> {/* Новая секция добавлена здесь */}
+			<Contact />
+		</div>
+	);
+};
+
+export default Home;
+
+```
+
+## src/pages/ServicePage.tsx
+
+```tsx
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, MessageCircle, PhoneCall } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import {
+	fetchServiceBySlug,
+	fetchGeneralData,
+} from '../services/apiService';
+import { TransformedService, TransformedGeneralData } from '../types/api';
+import Contact from '../components/Contact';
+import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import { formatPhoneNumberForTelLink } from '../lib/utils'; // Импортируем форматер для tel: ссылок
+
+const ServicePage: React.FC = () => {
+	const navigate = useNavigate();
+	const { serviceSlug } = useParams<{ serviceSlug: string }>();
+
+	const {
+		data: service,
+		isLoading: isLoadingService,
+		error: errorService,
+	} = useQuery<TransformedService | null>({
+		queryKey: ['service', serviceSlug],
+		queryFn: () => {
+			if (!serviceSlug) return Promise.resolve(null);
+			return fetchServiceBySlug(serviceSlug);
+		},
+		enabled: !!serviceSlug,
+	});
+
+	const { data: generalData, isLoading: isLoadingGeneral } =
+		useQuery<TransformedGeneralData | null>({
+			queryKey: ['generalData'],
+			queryFn: fetchGeneralData,
+		});
+
+	if (isLoadingService) {
+		return (
+			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
+				Загрузка услуги...
+			</div>
+		);
+	}
+
+	if (errorService || !service) {
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					{errorService ? 'Ошибка загрузки услуги' : 'Услуга не найдена'}
+				</h2>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	const rawPhone = generalData?.phone || '+7 965 511 8585';
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone); // Форматируем для tel: ссылки
+
+	const displayAddress =
+		generalData?.address || 'Березовский, Транспортников 42А';
+	const whatsAppNumber = generalData?.whatsappPhone || '79655118585'; // generalData.whatsappPhone уже отформатирован в apiService
+	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+
+	return (
+		<div className='pt-16 md:pt-24 bg-gray-900'>
+			<div
+				className='relative h-[50vh] flex items-center bg-gray-700'
+				style={{
+					backgroundImage: `url(${service.imageUrl})`,
+					backgroundPosition: 'center',
+					backgroundSize: 'cover',
+				}}
+			>
+				<div className='absolute inset-0 bg-black opacity-70'></div>
+				<div className='container mx-auto px-4 relative z-10'>
+					<button
+						onClick={() => navigate(-1)}
+						className='mb-6 flex items-center text-gray-300 hover:text-red-500 transition-colors'
+					>
+						<ArrowLeft size={20} className='mr-2' />
+						Назад
+					</button>
+					<h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
+						{service.title}
+					</h1>
+				</div>
+			</div>
+
+			<div className='container mx-auto px-4 py-16'>
+				<div className='grid grid-cols-1 lg:grid-cols-3 gap-12'>
+					<div className='lg:col-span-2'>
+						<h2 className='text-3xl font-bold text-white mb-6'>
+							Об услуге
+						</h2>
+
+						<div className='prose prose-invert max-w-none text-gray-300 text-lg mb-8'>
+							{service.fullDescriptionObject && (
+								<StrapiRichTextRenderer
+									content={service.fullDescriptionObject}
+								/>
+							)}
+						</div>
+					</div>
+
+					<div className='lg:sticky lg:top-28 self-start'>
+						<div className='bg-gray-800 rounded-lg p-6 shadow-lg'>
+							<h3 className='text-xl font-semibold text-white mb-4'>
+								Свяжитесь с нами
+							</h3>
+							<p className='text-gray-300 mb-6'>
+								Для получения консультации или записи на сервис напишите
+								нам в WhatsApp или позвоните.
+							</p>
+							{isLoadingGeneral ? (
+								<div className='space-y-4'>
+									<div className='block w-full bg-green-600 text-white text-center font-semibold py-3 rounded-md opacity-50'>
+										Загрузка...
+									</div>
+									<div className='block w-full bg-red-600 text-white text-center font-semibold py-3 rounded-md opacity-50'>
+										Загрузка...
+									</div>
+								</div>
+							) : (
+								<>
+									<a
+										href={whatsAppLink}
+										target='_blank'
+										rel='noopener noreferrer'
+										className='block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center'
+									>
+										<MessageCircle className='mr-2' size={20} />
+										Написать в WhatsApp
+									</a>
+									<a
+										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для tel: ссылки
+										className='block w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center'
+									>
+										<PhoneCall className='mr-2' size={20} />
+										Позвонить
+									</a>
+								</>
+							)}
+							<div className='text-gray-400 text-sm mt-4'>
+								<p className='mb-2'>Часы работы: 10:00-22:00</p>
+								{isLoadingGeneral ? (
+									<p>Загрузка адреса...</p>
+								) : (
+									<p>Адрес: {displayAddress}</p>
+								)}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<Contact />
+		</div>
+	);
+};
+
+export default ServicePage;
+
+```
+
+## src/pages/WorkExamplePage.tsx
+
+```tsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWorkExampleById } from '../services/apiService';
+import {
+	TransformedWorkExamplePageData,
+	TransformedGalleryItem,
+} from '../types/api';
+import ImageCompare from '../components/ImageCompare';
+import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+
+const WorkExamplePage = () => {
+	const navigate = useNavigate();
+	const { workExampleId } = useParams<{ workExampleId: string }>();
+
+	const {
+		data: workExampleData,
+		isLoading,
+		error,
+	} = useQuery<TransformedWorkExamplePageData | null>({
+		queryKey: ['workExamplePageData', workExampleId],
+		queryFn: () => {
+			if (!workExampleId) return Promise.resolve(null);
+			return fetchWorkExampleById(workExampleId);
+		},
+		enabled: !!workExampleId,
+	});
+
+	const [activeItemIndex, setActiveItemIndex] = useState<number | null>(
+		null
+	);
+
+	const openModal = (index: number) => {
+		if (
+			workExampleData &&
+			index >= 0 &&
+			index < workExampleData.galleryItems.length
+		) {
+			setActiveItemIndex(index);
+			document.body.style.overflow = 'hidden';
+		}
+	};
+
+	const closeModal = useCallback(() => {
+		setActiveItemIndex(null);
+		document.body.style.overflow = 'auto';
+	}, []);
+
+	const nextItem = useCallback(() => {
+		if (activeItemIndex === null || !workExampleData?.galleryItems.length)
+			return;
+		setActiveItemIndex((prevIndex) =>
+			prevIndex !== null
+				? (prevIndex + 1) % workExampleData.galleryItems.length
+				: null
+		);
+	}, [activeItemIndex, workExampleData]);
+
+	const prevItem = useCallback(() => {
+		if (activeItemIndex === null || !workExampleData?.galleryItems.length)
+			return;
+		setActiveItemIndex((prevIndex) =>
+			prevIndex !== null
+				? (prevIndex - 1 + workExampleData.galleryItems.length) %
+				  workExampleData.galleryItems.length
+				: null
+		);
+	}, [activeItemIndex, workExampleData]);
+
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (activeItemIndex === null) return;
+			if (event.key === 'Escape') closeModal();
+			else if (event.key === 'ArrowRight') nextItem();
+			else if (event.key === 'ArrowLeft') prevItem();
+		};
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [activeItemIndex, closeModal, nextItem, prevItem]);
+
+	if (isLoading) {
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-white flex justify-center items-center'>
+				Загрузка проекта...
+			</div>
+		);
+	}
+
+	if (error || !workExampleData) {
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Проект не найден или произошла ошибка
+				</h2>
+				<Link
+					to='/gallery'
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md'
+				>
+					Ко всем работам
+				</Link>
+			</div>
+		);
+	}
+
+	const activeModalItem: TransformedGalleryItem | null =
+		activeItemIndex !== null &&
+		workExampleData.galleryItems[activeItemIndex]
+			? workExampleData.galleryItems[activeItemIndex]
+			: null;
+
+	return (
+		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
+			<div className='container mx-auto px-4 py-16'>
+				<button
+					onClick={() => navigate('/gallery')}
+					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
+				>
+					<ArrowLeft size={20} className='mr-2' />
+					Назад к галерее работ
+				</button>
+
+				{workExampleData.mainPreviewImageUrl &&
+					workExampleData.mainPreviewImageUrl !== '/placeholder.png' && (
+						<div className='relative h-[40vh] md:h-[50vh] rounded-lg overflow-hidden mb-12 shadow-lg bg-gray-800'>
+							<img
+								src={workExampleData.mainPreviewImageUrl}
+								alt={`Главное изображение для ${workExampleData.title}`}
+								className='w-full h-full object-cover'
+							/>
+							<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
+						</div>
+					)}
+
+				<h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
+					{workExampleData.title}
+				</h1>
+
+				<div className='prose prose-invert max-w-none text-gray-300 mb-12'>
+					{workExampleData.descriptionObject && (
+						<StrapiRichTextRenderer
+							content={workExampleData.descriptionObject}
+						/>
+					)}
+				</div>
+
+				{workExampleData.galleryItems.length === 0 && (
+					<p className='text-center text-gray-400'>
+						Для этого проекта пока нет изображений в галерее.
+					</p>
+				)}
+
+				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10'>
+					{workExampleData.galleryItems.map((item, index) => (
+						<div key={item.id} className='group'>
+							<div
+								className='relative overflow-hidden rounded-lg h-[300px] md:h-[350px] mb-3 bg-gray-800 cursor-pointer shadow-md hover:shadow-red-500/30 transition-shadow'
+								onClick={() => openModal(index)}
+							>
+								{item.type === 'single' ? (
+									<>
+										<img
+											src={item.imageUrl}
+											alt={item.title}
+											className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+											loading='lazy'
+										/>
+										<div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none'>
+											<svg
+												xmlns='http://www.w3.org/2000/svg'
+												fill='none'
+												viewBox='0 0 24 24'
+												strokeWidth={1.5}
+												stroke='currentColor'
+												className='w-12 h-12 text-white'
+											>
+												<path
+													strokeLinecap='round'
+													strokeLinejoin='round'
+													d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'
+												/>
+											</svg>
+										</div>
+									</>
+								) : (
+									<ImageCompare
+										beforeImage={item.beforeImage}
+										afterImage={item.afterImage}
+										altBefore={`До - ${item.title}`}
+										altAfter={`После - ${item.title}`}
+									/>
+								)}
+							</div>
+							<div>
+								<h4
+									className='text-lg font-semibold text-white mb-1 truncate'
+									title={item.title}
+								>
+									{item.title}
+								</h4>
+								{item.type === 'beforeAfter' && (
+									<span className='text-sm text-gray-400 ml-0 block mb-1'>
+										(Сравнение До/После)
+									</span>
+								)}
+								<p
+									className='text-gray-300 text-sm line-clamp-2'
+									title={item.description}
+								>
+									{item.description}
+								</p>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			{activeModalItem && (
+				<div
+					className='fixed inset-0 bg-black/90 z-[100] flex flex-col p-4 md:p-8 items-center justify-center'
+					onClick={closeModal}
+				>
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+							closeModal();
+						}}
+						className='absolute top-4 right-4 md:top-6 md:right-6 text-white hover:text-red-500 transition-colors z-[102]'
+						aria-label='Закрыть'
+					>
+						<X size={32} />
+					</button>
+
+					<div
+						className='relative w-full h-full flex flex-col items-center justify-center'
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className='flex-grow flex items-center justify-center w-full max-w-5xl max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-150px)] mb-4'>
+							{activeModalItem.type === 'single' ? (
+								<img
+									src={activeModalItem.imageUrl}
+									alt={activeModalItem.title}
+									className='block max-w-full max-h-full object-contain rounded-lg shadow-xl'
+								/>
+							) : (
+								<div className='w-full h-full bg-gray-800 rounded-lg overflow-hidden'>
+									<ImageCompare
+										beforeImage={activeModalItem.beforeImage}
+										afterImage={activeModalItem.afterImage}
+										altBefore={`До - ${activeModalItem.title}`}
+										altAfter={`После - ${activeModalItem.title}`}
+									/>
+								</div>
+							)}
+						</div>
+
+						<div className='w-full max-w-4xl text-center text-white flex justify-between items-center shrink-0'>
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									prevItem();
+								}}
+								className='bg-black/50 rounded-full p-2 hover:bg-red-600 transition-colors'
+								aria-label='Предыдущий слайд'
+								disabled={workExampleData.galleryItems.length <= 1}
+							>
+								<ArrowLeft size={24} />
+							</button>
+							<div className='px-4 flex-grow min-w-0'>
+								<h3
+									className='text-lg md:text-xl font-semibold truncate'
+									title={activeModalItem.title}
+								>
+									{activeModalItem.title}
+								</h3>
+								<p
+									className='text-sm text-gray-300 truncate'
+									title={activeModalItem.description}
+								>
+									{activeModalItem.description}
+								</p>
+							</div>
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									nextItem();
+								}}
+								className='bg-black/50 rounded-full p-2 hover:bg-red-600 transition-colors'
+								aria-label='Следующий слайд'
+								disabled={workExampleData.galleryItems.length <= 1}
+							>
+								<ArrowLeft size={24} className='rotate-180' />
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+};
+
+export default WorkExamplePage;
+
+```
+
+## src/services/apiService.ts
+
+```ts
+import { gqlClient, getStrapiURL } from '../lib/graphql';
+import {
+	GET_SERVICES_QUERY,
+	GET_SERVICE_BY_SLUG_QUERY,
+	GET_WORK_EXAMPLES_FOR_PREVIEW_QUERY,
+	GET_WORK_EXAMPLE_BY_ID_QUERY,
+	GET_HERO_DATA_QUERY,
+	GET_WHY_CHOOSE_US_DATA_QUERY,
+	GET_CARS_FOR_SALE_PREVIEW_QUERY,
+	GET_CAR_BY_ID_QUERY,
+	GET_GENERAL_DATA_QUERY, // Новый импорт
+} from '../lib/queries';
+import {
+	ServicesGraphQLResponse,
+	ServiceGraphQLResponse,
+	WorkExamplesGraphQLResponse,
+	WorkExampleGraphQLResponse,
+	HeroGraphQLResponse,
+	WhyChooseUsGraphQLResponse,
+	CarsGraphQLResponse,
+	CarGraphQLResponse,
+	GeneralGraphQLResponse, // Новый импорт
+	ApiService,
+	ApiWorkExample,
+	ApiGalleryItem,
+	ApiImage,
+	ApiHero,
+	ApiWhyChooseUs,
+	ApiCar,
+	ApiGeneral, // Новый импорт
+	TransformedService,
+	TransformedGalleryItem,
+	TransformedWorkExamplePreviewItem,
+	TransformedWorkExamplePageData,
+	TransformedHeroData,
+	TransformedWhyChooseUsData,
+	TransformedCarPreview,
+	TransformedCarPageData,
+	TransformedGeneralData, // Новый импорт
+	StrapiRichTextBlock,
+} from '../types/api';
+
+const transformApiImageToUrl = (
+	apiImage: ApiImage | undefined | null
+): string => {
+	return getStrapiURL(apiImage?.url);
+};
+
+const extractTextFromRichText = (
+	blocks: StrapiRichTextBlock[] | null | undefined
+): string => {
+	if (!blocks || !Array.isArray(blocks)) return '';
+	return blocks
+		.map((block) =>
+			block.children.map((child) => child.text || '').join('')
+		)
+		.join('\n')
+		.trim();
+};
+
+const extractListItemsFromRichText = (
+	blocks: StrapiRichTextBlock[] | null | undefined
+): string[] => {
+	const items: string[] = [];
+	if (!blocks || !Array.isArray(blocks)) return items;
+
+	for (const block of blocks) {
+		if (block.type === 'list' && Array.isArray(block.children)) {
+			for (const listItem of block.children) {
+				if (
+					listItem.type === 'list-item' &&
+					// @ts-ignore
+					Array.isArray(listItem.children)
+				) {
+					// @ts-ignore
+					const text = listItem.children
+						// @ts-ignore
+						.map((childNode) => childNode.text || '')
+						.join('')
+						.trim();
+					if (text) {
+						items.push(text);
+					}
+				}
+			}
+		}
+	}
+	return items;
+};
+
+const transformApiServiceToTransformedService = (
+	apiService: ApiService
+): TransformedService => {
+	const richTextBlocks = apiService.fullDescription as
+		| StrapiRichTextBlock[]
+		| null;
+
+	return {
+		strapiId: apiService.documentId,
+		id: apiService.service_id,
+		title: apiService.title,
+		shortDescription: apiService.shortDescription,
+		fullDescriptionObject: richTextBlocks,
+		imageUrl: transformApiImageToUrl(apiService.image),
+		services: extractListItemsFromRichText(richTextBlocks),
+	};
+};
+
+const transformApiGalleryItemToTransformed = (
+	apiGalleryItem: ApiGalleryItem
+): TransformedGalleryItem => {
+	const descriptionText =
+		typeof apiGalleryItem.description === 'string'
+			? apiGalleryItem.description
+			: extractTextFromRichText(
+					apiGalleryItem.description as StrapiRichTextBlock[] | null
+			  );
+
+	const baseItem = {
+		id: apiGalleryItem.documentId,
+		title: apiGalleryItem.title,
+		description: descriptionText,
+	};
+
+	if (apiGalleryItem.type === 'beforeAfter') {
+		return {
+			...baseItem,
+			type: 'beforeAfter',
+			beforeImage: transformApiImageToUrl(apiGalleryItem.beforeImage),
+			afterImage: transformApiImageToUrl(apiGalleryItem.afterImage),
+		};
+	}
+	return {
+		...baseItem,
+		type: 'single',
+		imageUrl: transformApiImageToUrl(apiGalleryItem.imageUrl),
+	};
+};
+
+const transformApiWorkExampleToPreviewItem = (
+	apiWorkExample: ApiWorkExample
+): TransformedWorkExamplePreviewItem => {
+	const firstGalleryItem = apiWorkExample.gallery_items?.[0];
+	const workExampleDescriptionText = extractTextFromRichText(
+		apiWorkExample.description as StrapiRichTextBlock[] | null
+	);
+
+	if (firstGalleryItem) {
+		const transformedFirstGalleryItem =
+			transformApiGalleryItemToTransformed(firstGalleryItem);
+		return {
+			...transformedFirstGalleryItem,
+			workExampleId: apiWorkExample.documentId,
+			originalTitle: apiWorkExample.title,
+			description:
+				workExampleDescriptionText.substring(0, 150) +
+				(workExampleDescriptionText.length > 150 ? '...' : ''),
+		};
+	}
+
+	return {
+		id: apiWorkExample.documentId,
+		type: 'single',
+		imageUrl: transformApiImageToUrl(apiWorkExample.mainPreviewImage),
+		title: apiWorkExample.title,
+		description:
+			workExampleDescriptionText.substring(0, 150) +
+			(workExampleDescriptionText.length > 150 ? '...' : ''),
+		workExampleId: apiWorkExample.documentId,
+		originalTitle: apiWorkExample.title,
+	};
+};
+
+const transformApiWorkExampleToPageData = (
+	apiWorkExample: ApiWorkExample
+): TransformedWorkExamplePageData => {
+	return {
+		id: apiWorkExample.documentId,
+		title: apiWorkExample.title,
+		descriptionObject: apiWorkExample.description as
+			| StrapiRichTextBlock[]
+			| null,
+		mainPreviewImageUrl: transformApiImageToUrl(
+			apiWorkExample.mainPreviewImage
+		),
+		galleryItems: apiWorkExample.gallery_items.map(
+			transformApiGalleryItemToTransformed
+		),
+	};
+};
+
+const transformApiHeroToTransformedData = (
+	apiHero: ApiHero | null
+): TransformedHeroData | null => {
+	if (!apiHero) return null;
+	return {
+		title: apiHero.title || 'Автосервис',
+		secondTitle: apiHero.secondTitle || 'ТрейдАвто-групп',
+		description:
+			apiHero.description ||
+			'Профессиональный ремонт и обслуживание автомобилей.',
+	};
+};
+
+const transformApiWhyChooseUsToTransformedData = (
+	apiWhyChooseUs: ApiWhyChooseUs | null
+): TransformedWhyChooseUsData | null => {
+	if (!apiWhyChooseUs) return null;
+
+	const richTextBlocks = apiWhyChooseUs.fullDescription as
+		| StrapiRichTextBlock[]
+		| null;
+
+	return {
+		title: apiWhyChooseUs.title || 'Почему выбирают нас',
+		fullDescriptionObject: richTextBlocks,
+		imageUrl: transformApiImageToUrl(apiWhyChooseUs.imageUrl),
+		features: extractListItemsFromRichText(richTextBlocks),
+	};
+};
+
+const transformApiCarToPreview = (
+	apiCar: ApiCar
+): TransformedCarPreview => {
+	const firstImage = apiCar.images?.[0];
+	return {
+		id: apiCar.documentId,
+		title: apiCar.title || 'Название автомобиля отсутствует',
+		cost: apiCar.cost || 'Цена не указана',
+		imageUrl: transformApiImageToUrl(firstImage),
+	};
+};
+
+const transformApiCarToPageData = (
+	apiCar: ApiCar
+): TransformedCarPageData => {
+	return {
+		id: apiCar.documentId,
+		title: apiCar.title || 'Название автомобиля отсутствует',
+		descriptionObject: apiCar.description as StrapiRichTextBlock[] | null,
+		cost: apiCar.cost || 'Цена не указана',
+		images: apiCar.images.map((img) => ({
+			url: transformApiImageToUrl(img),
+			alt: img.alternativeText || apiCar.title || 'Изображение автомобиля',
+		})),
+	};
+};
+
+const formatPhoneNumberForWhatsApp = (
+	phone: string | undefined | null
+): string => {
+	if (!phone) return '';
+	return phone.replace(/[^0-9]/g, ''); // Удаляет все нецифровые символы
+};
+
+const transformApiGeneralToTransformedData = (
+	apiGeneral: ApiGeneral | null
+): TransformedGeneralData | null => {
+	if (!apiGeneral) return null;
+	const defaultPhone = '+7 965 511 8585';
+	const defaultAddress = 'Березовский, Транспортников 42А';
+
+	const phone = apiGeneral.phone || defaultPhone;
+	return {
+		phone: phone,
+		address: apiGeneral.address || defaultAddress,
+		whatsappPhone: formatPhoneNumberForWhatsApp(phone),
+	};
+};
+
+export const fetchHeroData =
+	async (): Promise<TransformedHeroData | null> => {
+		const response = await gqlClient.request<HeroGraphQLResponse>(
+			GET_HERO_DATA_QUERY
+		);
+		return transformApiHeroToTransformedData(response.hero);
+	};
+
+export const fetchWhyChooseUsData =
+	async (): Promise<TransformedWhyChooseUsData | null> => {
+		const response = await gqlClient.request<WhyChooseUsGraphQLResponse>(
+			GET_WHY_CHOOSE_US_DATA_QUERY
+		);
+		return transformApiWhyChooseUsToTransformedData(response.whyChooseUs);
+	};
+
+export const fetchServices = async (): Promise<TransformedService[]> => {
+	const response = await gqlClient.request<ServicesGraphQLResponse>(
+		GET_SERVICES_QUERY
+	);
+	return response.services
+		.map(transformApiServiceToTransformedService)
+		.filter((s): s is TransformedService => s !== null);
+};
+
+export const fetchServiceBySlug = async (
+	serviceSlug: string
+): Promise<TransformedService | null> => {
+	const response = await gqlClient.request<ServiceGraphQLResponse>(
+		GET_SERVICE_BY_SLUG_QUERY,
+		{ serviceIdSlug: serviceSlug }
+	);
+	if (response.services && response.services.length > 0) {
+		return transformApiServiceToTransformedService(response.services[0]);
+	}
+	return null;
+};
+
+export const fetchWorkExamplesForPreview = async (): Promise<
+	TransformedWorkExamplePreviewItem[]
+> => {
+	const response = await gqlClient.request<WorkExamplesGraphQLResponse>(
+		GET_WORK_EXAMPLES_FOR_PREVIEW_QUERY
+	);
+	return response.workExamples.map(transformApiWorkExampleToPreviewItem);
+};
+
+export const fetchWorkExampleById = async (
+	workExampleDocumentId: string
+): Promise<TransformedWorkExamplePageData | null> => {
+	const response = await gqlClient.request<WorkExampleGraphQLResponse>(
+		GET_WORK_EXAMPLE_BY_ID_QUERY,
+		{ workExampleDocumentId }
+	);
+	if (response.workExample) {
+		return transformApiWorkExampleToPageData(response.workExample);
+	}
+	return null;
+};
+
+export const fetchCarsForSalePreview = async (): Promise<
+	TransformedCarPreview[]
+> => {
+	const response = await gqlClient.request<CarsGraphQLResponse>(
+		GET_CARS_FOR_SALE_PREVIEW_QUERY
+	);
+	return response.cars.map(transformApiCarToPreview);
+};
+
+export const fetchCarById = async (
+	carDocumentId: string
+): Promise<TransformedCarPageData | null> => {
+	const response = await gqlClient.request<CarGraphQLResponse>(
+		GET_CAR_BY_ID_QUERY,
+		{ carDocumentId }
+	);
+	if (response.car) {
+		return transformApiCarToPageData(response.car);
+	}
+	return null;
+};
+
+export const fetchGeneralData =
+	async (): Promise<TransformedGeneralData | null> => {
+		try {
+			const response = await gqlClient.request<GeneralGraphQLResponse>(
+				GET_GENERAL_DATA_QUERY
+			);
+			return transformApiGeneralToTransformedData(response.general);
+		} catch (error) {
+			console.error('Ошибка при загрузке общих данных:', error);
+			// Возвращаем дефолтные значения в случае ошибки, чтобы сайт не падал
+			return {
+				phone: '+7 965 511 8585',
+				address: 'Березовский, Транспортников 42А',
+				whatsappPhone: '79655118585',
+			};
+		}
+	};
+
+```
+
+## src/types/api.ts
+
+```ts
+// src/types/api.ts
+
+// Тип для блоков Strapi Rich Text (упрощенный, можно уточнить при необходимости)
+export type StrapiRichTextBlock = {
+	type: string;
+	children: {
+		// children: any; // Сохраняем это поле, если оно используется в ваших данных - Убрал, т.к. Strapi обычно имеет children: { text: string, type?: string, ... }
+		type: string;
+		text: string;
+		bold?: boolean;
+		italic?: boolean;
+		underline?: boolean;
+		strikethrough?: boolean;
+		code?: boolean;
+	}[];
+	format?: 'ordered' | 'unordered';
+	level?: number;
+	// ... могут быть другие поля в зависимости от типа блока (image, link и т.д.)
+};
+
+// Тип для объекта изображения, как он приходит из GraphQL (поля из UploadFile)
+export interface ApiImage {
+	documentId?: string; // ID самого файла
+	url: string;
+	alternativeText?: string | null;
+	width?: number | null;
+	height?: number | null;
+}
+
+// Тип для Hero, как он приходит из GraphQL
+export interface ApiHero {
+	// documentId: string; // Singleton, ID может не быть или не использоваться
+	title: string | null;
+	secondTitle: string | null;
+	description: string | null;
+}
+
+// Ответ для запроса Hero
+export interface HeroGraphQLResponse {
+	hero: ApiHero | null;
+}
+
+// Тип для WhyChooseUs, как он приходит из GraphQL
+export interface ApiWhyChooseUs {
+	// documentId: string;
+	title: string | null;
+	// shortDescription: string | null; // Раскомментировать если будет использоваться
+	fullDescription: StrapiRichTextBlock[] | any | null; // JSON (массив блоков Rich Text)
+	imageUrl?: ApiImage | null;
+}
+
+// Ответ для запроса WhyChooseUs
+export interface WhyChooseUsGraphQLResponse {
+	whyChooseUs: ApiWhyChooseUs | null;
+}
+
+// Тип для Service, как он приходит из GraphQL
+export interface ApiService {
+	documentId: string; // Strapi ID
+	title: string;
+	service_id: string; // Наш слаг
+	shortDescription: string;
+	fullDescription: StrapiRichTextBlock[] | any | null; // JSON (массив блоков Rich Text)
+	image?: ApiImage | null; // Поле изображения теперь напрямую ApiImage
+}
+
+// Ответ для запроса списка услуг
+export interface ServicesGraphQLResponse {
+	services: ApiService[];
+}
+// Ответ для запроса одной услуги (Strapi часто возвращает массив даже для одного элемента при фильтрации)
+export interface ServiceGraphQLResponse {
+	services: ApiService[];
+}
+
+// Тип для GalleryItem, как он приходит из GraphQL
+export interface ApiGalleryItem {
+	documentId: string;
+	title: string;
+	description: string | StrapiRichTextBlock[] | any | null; // Может быть простой строкой или Rich Text
+	type: 'single' | 'beforeAfter';
+	imageUrl?: ApiImage | null;
+	beforeImage?: ApiImage | null;
+	afterImage?: ApiImage | null;
+}
+
+// Тип для WorkExample, как он приходит из GraphQL
+export interface ApiWorkExample {
+	documentId: string;
+	title: string;
+	description: StrapiRichTextBlock[] | any | null; // JSON (массив блоков Rich Text)
+	mainPreviewImage?: ApiImage | null;
+	completionDate?: string | null;
+	gallery_items: ApiGalleryItem[]; // Массив элементов галереи
+}
+
+// Ответ для запроса списка примеров работ
+export interface WorkExamplesGraphQLResponse {
+	workExamples: ApiWorkExample[];
+}
+// Ответ для запроса одного примера работы
+export interface WorkExampleGraphQLResponse {
+	workExample: ApiWorkExample | null; // Может быть null, если не найден
+}
+
+// Тип для Car, как он приходит из GraphQL
+export interface ApiCar {
+	documentId: string;
+	title: string;
+	description: StrapiRichTextBlock[] | any | null; // JSON (массив блоков Rich Text)
+	cost: string | null;
+	images: ApiImage[]; // Массив изображений
+}
+
+// Ответ для запроса списка автомобилей
+export interface CarsGraphQLResponse {
+	cars: ApiCar[];
+}
+
+// Ответ для запроса одного автомобиля
+export interface CarGraphQLResponse {
+	car: ApiCar | null;
+}
+
+// Тип для General (общие настройки сайта), как он приходит из GraphQL
+export interface ApiGeneral {
+	phone: string | null;
+	address: string | null;
+}
+
+// Ответ для запроса General
+export interface GeneralGraphQLResponse {
+	general: ApiGeneral | null;
+}
+
+// --- Трансформированные типы для использования в компонентах ---
+
+export interface TransformedHeroData {
+	title: string;
+	secondTitle: string;
+	description: string;
+	// backgroundImage: string; // Если бы API предоставлял
+}
+
+export interface TransformedWhyChooseUsData {
+	title: string;
+	fullDescriptionObject: StrapiRichTextBlock[] | null;
+	imageUrl: string;
+	features: string[]; // Извлеченные пункты из fullDescription (ранее 'services' для этого блока)
+}
+
+export interface TransformedService {
+	strapiId: string;
+	id: string; // Наш service_id (слаг)
+	title: string;
+	shortDescription: string;
+	fullDescriptionObject: StrapiRichTextBlock[] | null; // Объект для рендерера
+	imageUrl: string; // Полный URL
+	services: string[]; // Список характеристик/подпунктов услуги, извлеченных из fullDescriptionObject
+}
+
+export interface TransformedGalleryItemBase {
+	id: string; // documentId из ApiGalleryItem
+	title: string;
+	description: string; // Преобразовано в строку для простоты в карточках
+}
+export interface TransformedGallerySingleItem
+	extends TransformedGalleryItemBase {
+	type: 'single';
+	imageUrl: string;
+}
+export interface TransformedGalleryBeforeAfterItem
+	extends TransformedGalleryItemBase {
+	type: 'beforeAfter';
+	beforeImage: string;
+	afterImage: string;
+}
+export type TransformedGalleryItem =
+	| TransformedGallerySingleItem
+	| TransformedGalleryBeforeAfterItem;
+
+export interface TransformedWorkExamplePreviewItemBase {
+	workExampleId: string; // documentId из ApiWorkExample
+	originalTitle: string;
+}
+export type TransformedWorkExamplePreviewItem =
+	| (TransformedGallerySingleItem & TransformedWorkExamplePreviewItemBase)
+	| (TransformedGalleryBeforeAfterItem &
+			TransformedWorkExamplePreviewItemBase);
+
+export interface TransformedWorkExamplePageData {
+	id: string; // documentId из ApiWorkExample
+	title: string;
+	descriptionObject: StrapiRichTextBlock[] | null; // Объект для рендерера
+	mainPreviewImageUrl: string; // Полный URL
+	galleryItems: TransformedGalleryItem[];
+}
+
+// Трансформированный тип для превью автомобиля в списке
+export interface TransformedCarPreview {
+	id: string; // documentId
+	title: string;
+	cost: string;
+	imageUrl: string; // URL первого изображения
+}
+
+// Трансформированный тип для страницы автомобиля
+export interface TransformedCarPageData {
+	id: string; // documentId
+	title: string;
+	descriptionObject: StrapiRichTextBlock[] | null;
+	cost: string;
+	images: { url: string; alt: string }[]; // Массив URL изображений
+}
+
+// Трансформированный тип для общих настроек сайта
+export interface TransformedGeneralData {
+	phone: string;
+	address: string;
+	whatsappPhone: string; // Номер телефона, отформатированный для WhatsApp ссылки
+}
+
+```
+
+## src/vite-env.d.ts
+
+```ts
+/// <reference types="vite/client" />
+
+```
+
+Отвечай на русском языке это очень важно. 
+Пиши код полностью, не пропускай и не сокращай. 
+
+Фоновое изображение для Hero приходит с бэкенда. Сделай это
 
 
-Блок 11. Карта и контакты. 
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
 
-Березовский, транспортников 42А
-Время работы 10:00-22:00
-Номер телефона - +7 965 511 8585
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
 
-Стиль сайта темный. 
-И фон должен быть темным. 
-Стиль ночной гонщик.
-Акцентный цвет красный.
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
 
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
 
--------
+type Pagination {
+  total: Int!
+  page: Int!
+  pageSize: Int!
+  pageCount: Int!
+}
 
+type DeleteMutationResponse {
+  documentId: ID!
+}
 
-Слесарные работы:
-    Капитальный ремонт ДВС
-    Ремонт ГБЦ
-    Капитальный ремонт механических коробок
-    Обслуживание ходовой части
-    Ремонт мостов
-    Ремонт кардана
-    Ремонт рулевых реек
-    Восстановление ваших стоек амортизаторов
-    Замена ступичных подшипников
-    Замена колодок
-    Полное ТО
-    Замена масла в ДВС
-    Замена масла в КПП
-    Замена масла в системе ГУР
-    Промывка системы
-    Шиномонтаж
-    Замена радиатора
-    Замена радиатора печки
-    Замена ГРМ
-    Восстановление генераторов
-    Ремонт топливной системы
-    Замена бензонасоса
-    Промывка топливного бака
-    Шлифовка/расточка ГБЦ и Блоков
-    Восстановление и установка выхлопных систем
-    Замена всех технических жидкостей
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+}
 
+input IDFilterInput {
+  and: [ID]
+  or: [ID]
+  not: IDFilterInput
+  eq: ID
+  eqi: ID
+  ne: ID
+  nei: ID
+  startsWith: ID
+  endsWith: ID
+  contains: ID
+  notContains: ID
+  containsi: ID
+  notContainsi: ID
+  gt: ID
+  gte: ID
+  lt: ID
+  lte: ID
+  null: Boolean
+  notNull: Boolean
+  in: [ID]
+  notIn: [ID]
+  between: [ID]
+}
 
-Диагностика
-    Диагностика электронная (компьютерная)
-    Диагностика механическая
-    Комплексная диагностика (Полный осмотр авто)
-    Измерение компрессии в цилиндре
-    Проверка эндоскопом
-    Диагностика фар
-    Диагностика проводки
-(Диагностику типо на фоне машина и чел с компом чтото такое добавить)
+input BooleanFilterInput {
+  and: [Boolean]
+  or: [Boolean]
+  not: BooleanFilterInput
+  eq: Boolean
+  eqi: Boolean
+  ne: Boolean
+  nei: Boolean
+  startsWith: Boolean
+  endsWith: Boolean
+  contains: Boolean
+  notContains: Boolean
+  containsi: Boolean
+  notContainsi: Boolean
+  gt: Boolean
+  gte: Boolean
+  lt: Boolean
+  lte: Boolean
+  null: Boolean
+  notNull: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+  between: [Boolean]
+}
 
-Электрика
-    Восстановление и замена проводки
-    Ремонт фар
-    Ремонт приборной панели
-    Установка музыки (колонки, настройка магнитофона, савбуфер, усилитель и т.д.)
-    Установка сигнализации
-    Замена лампочек (В фарах, приборной панели, на торпедо) 
-    Восстановление систем SRS (восстановление полной системы безопаности подушек, ремней)
+input StringFilterInput {
+  and: [String]
+  or: [String]
+  not: StringFilterInput
+  eq: String
+  eqi: String
+  ne: String
+  nei: String
+  startsWith: String
+  endsWith: String
+  contains: String
+  notContains: String
+  containsi: String
+  notContainsi: String
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  null: Boolean
+  notNull: Boolean
+  in: [String]
+  notIn: [String]
+  between: [String]
+}
 
-Покраска
-    Полный окрас авто
-    Частичный окрас авто
-    Восстановление бамперов
-    Восстановление геометрии
-    Восстановление/выставление зазоров 
-    Покрас подкапотного пространства
-    Восстановление кабин грузовых авто (Газели, Hyundai Porter и т.д.)
-(Кузовные работы типо фото до и после типо такого)
+input IntFilterInput {
+  and: [Int]
+  or: [Int]
+  not: IntFilterInput
+  eq: Int
+  eqi: Int
+  ne: Int
+  nei: Int
+  startsWith: Int
+  endsWith: Int
+  contains: Int
+  notContains: Int
+  containsi: Int
+  notContainsi: Int
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+  null: Boolean
+  notNull: Boolean
+  in: [Int]
+  notIn: [Int]
+  between: [Int]
+}
 
-Сварочные работы
-    Переварка порогов
-    Переварка дна
-    Переварка арок
-    Переварка лонжеронов 
-    Переварка балки
-    Переварка глушителей
-    Переварка крыши
-    Переварка телевизоров
-(Сварочные работы фото бы именно со сваркой какой нибудь)
+input FloatFilterInput {
+  and: [Float]
+  or: [Float]
+  not: FloatFilterInput
+  eq: Float
+  eqi: Float
+  ne: Float
+  nei: Float
+  startsWith: Float
+  endsWith: Float
+  contains: Float
+  notContains: Float
+  containsi: Float
+  notContainsi: Float
+  gt: Float
+  gte: Float
+  lt: Float
+  lte: Float
+  null: Boolean
+  notNull: Boolean
+  in: [Float]
+  notIn: [Float]
+  between: [Float]
+}
 
-Детейлинг
-    Предпродажная подготовка (легкая полировка кузова и легкая химчистка салона)
-    Полная полировка кузова
-    Тонировка стекол любой сложности
-    Перешивка руля и салона
-    Перешивка ручек АКПП
-    Перешивка подлокотников
-    Обтягивание авто пленкой
+input DateFilterInput {
+  and: [Date]
+  or: [Date]
+  not: DateFilterInput
+  eq: Date
+  eqi: Date
+  ne: Date
+  nei: Date
+  startsWith: Date
+  endsWith: Date
+  contains: Date
+  notContains: Date
+  containsi: Date
+  notContainsi: Date
+  gt: Date
+  gte: Date
+  lt: Date
+  lte: Date
+  null: Boolean
+  notNull: Boolean
+  in: [Date]
+  notIn: [Date]
+  between: [Date]
+}
 
-Запчасти
-    У нас вы можете заказать любую запчасть на ваш автомобиль как новую так и контрактную по самым низким ценам  с доставкой
-    Сотрудничаем напрямую с крупными дестрибьютерами запчастей и жидкостей
+input DateTimeFilterInput {
+  and: [DateTime]
+  or: [DateTime]
+  not: DateTimeFilterInput
+  eq: DateTime
+  eqi: DateTime
+  ne: DateTime
+  nei: DateTime
+  startsWith: DateTime
+  endsWith: DateTime
+  contains: DateTime
+  notContains: DateTime
+  containsi: DateTime
+  notContainsi: DateTime
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+  null: Boolean
+  notNull: Boolean
+  in: [DateTime]
+  notIn: [DateTime]
+  between: [DateTime]
+}
 
+input JSONFilterInput {
+  and: [JSON]
+  or: [JSON]
+  not: JSONFilterInput
+  eq: JSON
+  eqi: JSON
+  ne: JSON
+  nei: JSON
+  startsWith: JSON
+  endsWith: JSON
+  contains: JSON
+  notContains: JSON
+  containsi: JSON
+  notContainsi: JSON
+  gt: JSON
+  gte: JSON
+  lt: JSON
+  lte: JSON
+  null: Boolean
+  notNull: Boolean
+  in: [JSON]
+  notIn: [JSON]
+  between: [JSON]
+}
 
+input UploadFileFiltersInput {
+  documentId: IDFilterInput
+  name: StringFilterInput
+  alternativeText: StringFilterInput
+  caption: StringFilterInput
+  width: IntFilterInput
+  height: IntFilterInput
+  formats: JSONFilterInput
+  hash: StringFilterInput
+  ext: StringFilterInput
+  mime: StringFilterInput
+  size: FloatFilterInput
+  url: StringFilterInput
+  previewUrl: StringFilterInput
+  provider: StringFilterInput
+  provider_metadata: JSONFilterInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [UploadFileFiltersInput]
+  or: [UploadFileFiltersInput]
+  not: UploadFileFiltersInput
+}
+
+type UploadFile {
+  documentId: ID!
+  name: String!
+  alternativeText: String
+  caption: String
+  width: Int
+  height: Int
+  formats: JSON
+  hash: String!
+  ext: String
+  mime: String!
+  size: Float!
+  url: String!
+  previewUrl: String
+  provider: String!
+  provider_metadata: JSON
+  related: [GenericMorph]
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type UploadFileEntityResponseCollection {
+  nodes: [UploadFile!]!
+  pageInfo: Pagination!
+}
+
+type UploadFileRelationResponseCollection {
+  nodes: [UploadFile!]!
+}
+
+input I18NLocaleFiltersInput {
+  documentId: IDFilterInput
+  name: StringFilterInput
+  code: StringFilterInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [I18NLocaleFiltersInput]
+  or: [I18NLocaleFiltersInput]
+  not: I18NLocaleFiltersInput
+}
+
+type I18NLocale {
+  documentId: ID!
+  name: String
+  code: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type I18NLocaleEntityResponseCollection {
+  nodes: [I18NLocale!]!
+  pageInfo: Pagination!
+}
+
+input ReviewWorkflowsWorkflowFiltersInput {
+  documentId: IDFilterInput
+  name: StringFilterInput
+  stages: ReviewWorkflowsWorkflowStageFiltersInput
+  stageRequiredToPublish: ReviewWorkflowsWorkflowStageFiltersInput
+  contentTypes: JSONFilterInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [ReviewWorkflowsWorkflowFiltersInput]
+  or: [ReviewWorkflowsWorkflowFiltersInput]
+  not: ReviewWorkflowsWorkflowFiltersInput
+}
+
+input ReviewWorkflowsWorkflowInput {
+  name: String
+  stages: [ID]
+  stageRequiredToPublish: ID
+  contentTypes: JSON
+  publishedAt: DateTime
+}
+
+type ReviewWorkflowsWorkflow {
+  documentId: ID!
+  name: String!
+  stages_connection(filters: ReviewWorkflowsWorkflowStageFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): ReviewWorkflowsWorkflowStageRelationResponseCollection
+  stages(filters: ReviewWorkflowsWorkflowStageFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [ReviewWorkflowsWorkflowStage]!
+  stageRequiredToPublish: ReviewWorkflowsWorkflowStage
+  contentTypes: JSON!
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type ReviewWorkflowsWorkflowEntityResponseCollection {
+  nodes: [ReviewWorkflowsWorkflow!]!
+  pageInfo: Pagination!
+}
+
+input ReviewWorkflowsWorkflowStageFiltersInput {
+  documentId: IDFilterInput
+  name: StringFilterInput
+  color: StringFilterInput
+  workflow: ReviewWorkflowsWorkflowFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [ReviewWorkflowsWorkflowStageFiltersInput]
+  or: [ReviewWorkflowsWorkflowStageFiltersInput]
+  not: ReviewWorkflowsWorkflowStageFiltersInput
+}
+
+input ReviewWorkflowsWorkflowStageInput {
+  name: String
+  color: String
+  workflow: ID
+  publishedAt: DateTime
+}
+
+type ReviewWorkflowsWorkflowStage {
+  documentId: ID!
+  name: String
+  color: String
+  workflow: ReviewWorkflowsWorkflow
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type ReviewWorkflowsWorkflowStageEntityResponseCollection {
+  nodes: [ReviewWorkflowsWorkflowStage!]!
+  pageInfo: Pagination!
+}
+
+type ReviewWorkflowsWorkflowStageRelationResponseCollection {
+  nodes: [ReviewWorkflowsWorkflowStage!]!
+}
+
+input UsersPermissionsPermissionFiltersInput {
+  documentId: IDFilterInput
+  action: StringFilterInput
+  role: UsersPermissionsRoleFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [UsersPermissionsPermissionFiltersInput]
+  or: [UsersPermissionsPermissionFiltersInput]
+  not: UsersPermissionsPermissionFiltersInput
+}
+
+type UsersPermissionsPermission {
+  documentId: ID!
+  action: String!
+  role: UsersPermissionsRole
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type UsersPermissionsPermissionRelationResponseCollection {
+  nodes: [UsersPermissionsPermission!]!
+}
+
+input UsersPermissionsRoleFiltersInput {
+  documentId: IDFilterInput
+  name: StringFilterInput
+  description: StringFilterInput
+  type: StringFilterInput
+  permissions: UsersPermissionsPermissionFiltersInput
+  users: UsersPermissionsUserFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [UsersPermissionsRoleFiltersInput]
+  or: [UsersPermissionsRoleFiltersInput]
+  not: UsersPermissionsRoleFiltersInput
+}
+
+input UsersPermissionsRoleInput {
+  name: String
+  description: String
+  type: String
+  permissions: [ID]
+  users: [ID]
+  publishedAt: DateTime
+}
+
+type UsersPermissionsRole {
+  documentId: ID!
+  name: String!
+  description: String
+  type: String
+  permissions_connection(filters: UsersPermissionsPermissionFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): UsersPermissionsPermissionRelationResponseCollection
+  permissions(filters: UsersPermissionsPermissionFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [UsersPermissionsPermission]!
+  users_connection(filters: UsersPermissionsUserFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): UsersPermissionsUserRelationResponseCollection
+  users(filters: UsersPermissionsUserFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [UsersPermissionsUser]!
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type UsersPermissionsRoleEntityResponseCollection {
+  nodes: [UsersPermissionsRole!]!
+  pageInfo: Pagination!
+}
+
+input UsersPermissionsUserFiltersInput {
+  documentId: IDFilterInput
+  username: StringFilterInput
+  email: StringFilterInput
+  provider: StringFilterInput
+  confirmed: BooleanFilterInput
+  blocked: BooleanFilterInput
+  role: UsersPermissionsRoleFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [UsersPermissionsUserFiltersInput]
+  or: [UsersPermissionsUserFiltersInput]
+  not: UsersPermissionsUserFiltersInput
+}
+
+input UsersPermissionsUserInput {
+  username: String
+  email: String
+  provider: String
+  confirmed: Boolean
+  blocked: Boolean
+  role: ID
+  publishedAt: DateTime
+  password: String
+}
+
+type UsersPermissionsUser {
+  documentId: ID!
+  username: String!
+  email: String!
+  provider: String
+  confirmed: Boolean
+  blocked: Boolean
+  role: UsersPermissionsRole
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type UsersPermissionsUserEntityResponse {
+  data: UsersPermissionsUser
+}
+
+type UsersPermissionsUserEntityResponseCollection {
+  nodes: [UsersPermissionsUser!]!
+  pageInfo: Pagination!
+}
+
+type UsersPermissionsUserRelationResponseCollection {
+  nodes: [UsersPermissionsUser!]!
+}
+
+input CarFiltersInput {
+  documentId: IDFilterInput
+  title: StringFilterInput
+  description: JSONFilterInput
+  cost: StringFilterInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [CarFiltersInput]
+  or: [CarFiltersInput]
+  not: CarFiltersInput
+}
+
+input CarInput {
+  title: String
+  description: JSON
+  cost: String
+  images: [ID]
+  publishedAt: DateTime
+}
+
+type Car {
+  documentId: ID!
+  title: String
+  description: JSON
+  cost: String
+  images_connection(filters: UploadFileFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): UploadFileRelationResponseCollection
+  images(filters: UploadFileFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [UploadFile]!
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type CarEntityResponseCollection {
+  nodes: [Car!]!
+  pageInfo: Pagination!
+}
+
+enum ENUM_GALLERYITEM_TYPE {
+  single
+  beforeAfter
+}
+
+input GalleryItemFiltersInput {
+  documentId: IDFilterInput
+  title: StringFilterInput
+  description: StringFilterInput
+  type: StringFilterInput
+  work_example: WorkExampleFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [GalleryItemFiltersInput]
+  or: [GalleryItemFiltersInput]
+  not: GalleryItemFiltersInput
+}
+
+input GalleryItemInput {
+  title: String
+  description: String
+  type: ENUM_GALLERYITEM_TYPE
+  imageUrl: ID
+  beforeImage: ID
+  afterImage: ID
+  work_example: ID
+  publishedAt: DateTime
+}
+
+type GalleryItem {
+  documentId: ID!
+  title: String
+  description: String
+  type: ENUM_GALLERYITEM_TYPE!
+  imageUrl: UploadFile
+  beforeImage: UploadFile
+  afterImage: UploadFile
+  work_example: WorkExample
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type GalleryItemEntityResponseCollection {
+  nodes: [GalleryItem!]!
+  pageInfo: Pagination!
+}
+
+type GalleryItemRelationResponseCollection {
+  nodes: [GalleryItem!]!
+}
+
+input GeneralInput {
+  phone: String
+  address: String
+  publishedAt: DateTime
+}
+
+type General {
+  documentId: ID!
+  phone: String
+  address: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input HeroInput {
+  title: String
+  secondTitle: String
+  description: String
+  backgroundImage: ID
+  publishedAt: DateTime
+}
+
+type Hero {
+  documentId: ID!
+  title: String
+  secondTitle: String
+  description: String
+  backgroundImage: UploadFile
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input ServiceFiltersInput {
+  documentId: IDFilterInput
+  title: StringFilterInput
+  service_id: StringFilterInput
+  shortDescription: StringFilterInput
+  fullDescription: JSONFilterInput
+  work_example: WorkExampleFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [ServiceFiltersInput]
+  or: [ServiceFiltersInput]
+  not: ServiceFiltersInput
+}
+
+input ServiceInput {
+  title: String
+  service_id: String
+  shortDescription: String
+  fullDescription: JSON
+  image: ID
+  galleryThumbnail: ID
+  work_example: ID
+  publishedAt: DateTime
+}
+
+type Service {
+  documentId: ID!
+  title: String
+  service_id: String
+  shortDescription: String
+  fullDescription: JSON
+  image: UploadFile
+  galleryThumbnail: UploadFile
+  work_example: WorkExample
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type ServiceEntityResponseCollection {
+  nodes: [Service!]!
+  pageInfo: Pagination!
+}
+
+type ServiceRelationResponseCollection {
+  nodes: [Service!]!
+}
+
+input WhyChooseUsInput {
+  title: String
+  shortDescription: String
+  imageUrl: ID
+  fullDescription: JSON
+  publishedAt: DateTime
+}
+
+type WhyChooseUs {
+  documentId: ID!
+  title: String
+  shortDescription: String
+  imageUrl: UploadFile
+  fullDescription: JSON
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input WorkExampleFiltersInput {
+  documentId: IDFilterInput
+  title: StringFilterInput
+  description: JSONFilterInput
+  completionDate: DateFilterInput
+  services: ServiceFiltersInput
+  gallery_items: GalleryItemFiltersInput
+  createdAt: DateTimeFilterInput
+  updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
+  and: [WorkExampleFiltersInput]
+  or: [WorkExampleFiltersInput]
+  not: WorkExampleFiltersInput
+}
+
+input WorkExampleInput {
+  title: String
+  description: JSON
+  mainPreviewImage: ID
+  completionDate: Date
+  services: [ID]
+  gallery_items: [ID]
+  publishedAt: DateTime
+}
+
+type WorkExample {
+  documentId: ID!
+  title: String
+  description: JSON
+  mainPreviewImage: UploadFile
+  completionDate: Date
+  services_connection(filters: ServiceFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): ServiceRelationResponseCollection
+  services(filters: ServiceFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [Service]!
+  gallery_items_connection(filters: GalleryItemFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): GalleryItemRelationResponseCollection
+  gallery_items(filters: GalleryItemFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): [GalleryItem]!
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+type WorkExampleEntityResponseCollection {
+  nodes: [WorkExample!]!
+  pageInfo: Pagination!
+}
+
+union GenericMorph = UploadFile | I18NLocale | ReviewWorkflowsWorkflow | ReviewWorkflowsWorkflowStage | UsersPermissionsPermission | UsersPermissionsRole | UsersPermissionsUser | Car | GalleryItem | General | Hero | Service | WhyChooseUs | WorkExample
+
+input FileInfoInput {
+  name: String
+  alternativeText: String
+  caption: String
+}
+
+type UsersPermissionsMe {
+  id: ID!
+  documentId: ID!
+  username: String!
+  email: String
+  confirmed: Boolean
+  blocked: Boolean
+  role: UsersPermissionsMeRole
+}
+
+type UsersPermissionsMeRole {
+  id: ID!
+  name: String!
+  description: String
+  type: String
+}
+
+input UsersPermissionsRegisterInput {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input UsersPermissionsLoginInput {
+  identifier: String!
+  password: String!
+  provider: String! = "local"
+}
+
+type UsersPermissionsPasswordPayload {
+  ok: Boolean!
+}
+
+type UsersPermissionsLoginPayload {
+  jwt: String
+  user: UsersPermissionsMe!
+}
+
+type UsersPermissionsCreateRolePayload {
+  ok: Boolean!
+}
+
+type UsersPermissionsUpdateRolePayload {
+  ok: Boolean!
+}
+
+type UsersPermissionsDeleteRolePayload {
+  ok: Boolean!
+}
+
+input PaginationArg {
+  page: Int
+  pageSize: Int
+  start: Int
+  limit: Int
+}
+
+type Query {
+  uploadFile(documentId: ID!, status: PublicationStatus = PUBLISHED): UploadFile
+  uploadFiles_connection(filters: UploadFileFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): UploadFileEntityResponseCollection
+  uploadFiles(filters: UploadFileFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [UploadFile]!
+  i18NLocale(documentId: ID!, status: PublicationStatus = PUBLISHED): I18NLocale
+  i18NLocales_connection(filters: I18NLocaleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): I18NLocaleEntityResponseCollection
+  i18NLocales(filters: I18NLocaleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [I18NLocale]!
+  reviewWorkflowsWorkflow(documentId: ID!, status: PublicationStatus = PUBLISHED): ReviewWorkflowsWorkflow
+  reviewWorkflowsWorkflows_connection(filters: ReviewWorkflowsWorkflowFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): ReviewWorkflowsWorkflowEntityResponseCollection
+  reviewWorkflowsWorkflows(filters: ReviewWorkflowsWorkflowFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [ReviewWorkflowsWorkflow]!
+  reviewWorkflowsWorkflowStage(documentId: ID!, status: PublicationStatus = PUBLISHED): ReviewWorkflowsWorkflowStage
+  reviewWorkflowsWorkflowStages_connection(filters: ReviewWorkflowsWorkflowStageFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): ReviewWorkflowsWorkflowStageEntityResponseCollection
+  reviewWorkflowsWorkflowStages(filters: ReviewWorkflowsWorkflowStageFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [ReviewWorkflowsWorkflowStage]!
+  usersPermissionsRole(documentId: ID!, status: PublicationStatus = PUBLISHED): UsersPermissionsRole
+  usersPermissionsRoles_connection(filters: UsersPermissionsRoleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): UsersPermissionsRoleEntityResponseCollection
+  usersPermissionsRoles(filters: UsersPermissionsRoleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [UsersPermissionsRole]!
+  usersPermissionsUser(documentId: ID!, status: PublicationStatus = PUBLISHED): UsersPermissionsUser
+  usersPermissionsUsers_connection(filters: UsersPermissionsUserFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): UsersPermissionsUserEntityResponseCollection
+  usersPermissionsUsers(filters: UsersPermissionsUserFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [UsersPermissionsUser]!
+  car(documentId: ID!, status: PublicationStatus = PUBLISHED): Car
+  cars_connection(filters: CarFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): CarEntityResponseCollection
+  cars(filters: CarFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [Car]!
+  galleryItem(documentId: ID!, status: PublicationStatus = PUBLISHED): GalleryItem
+  galleryItems_connection(filters: GalleryItemFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): GalleryItemEntityResponseCollection
+  galleryItems(filters: GalleryItemFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [GalleryItem]!
+  general(status: PublicationStatus = PUBLISHED): General
+  hero(status: PublicationStatus = PUBLISHED): Hero
+  service(documentId: ID!, status: PublicationStatus = PUBLISHED): Service
+  services_connection(filters: ServiceFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): ServiceEntityResponseCollection
+  services(filters: ServiceFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [Service]!
+  whyChooseUs(status: PublicationStatus = PUBLISHED): WhyChooseUs
+  workExample(documentId: ID!, status: PublicationStatus = PUBLISHED): WorkExample
+  workExamples_connection(filters: WorkExampleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): WorkExampleEntityResponseCollection
+  workExamples(filters: WorkExampleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], status: PublicationStatus = PUBLISHED): [WorkExample]!
+  me: UsersPermissionsMe
+}
+
+type Mutation {
+  createReviewWorkflowsWorkflow(status: PublicationStatus = PUBLISHED, data: ReviewWorkflowsWorkflowInput!): ReviewWorkflowsWorkflow
+  updateReviewWorkflowsWorkflow(documentId: ID!, status: PublicationStatus = PUBLISHED, data: ReviewWorkflowsWorkflowInput!): ReviewWorkflowsWorkflow
+  deleteReviewWorkflowsWorkflow(documentId: ID!): DeleteMutationResponse
+  createReviewWorkflowsWorkflowStage(status: PublicationStatus = PUBLISHED, data: ReviewWorkflowsWorkflowStageInput!): ReviewWorkflowsWorkflowStage
+  updateReviewWorkflowsWorkflowStage(documentId: ID!, status: PublicationStatus = PUBLISHED, data: ReviewWorkflowsWorkflowStageInput!): ReviewWorkflowsWorkflowStage
+  deleteReviewWorkflowsWorkflowStage(documentId: ID!): DeleteMutationResponse
+  createCar(status: PublicationStatus = PUBLISHED, data: CarInput!): Car
+  updateCar(documentId: ID!, status: PublicationStatus = PUBLISHED, data: CarInput!): Car
+  deleteCar(documentId: ID!): DeleteMutationResponse
+  createGalleryItem(status: PublicationStatus = PUBLISHED, data: GalleryItemInput!): GalleryItem
+  updateGalleryItem(documentId: ID!, status: PublicationStatus = PUBLISHED, data: GalleryItemInput!): GalleryItem
+  deleteGalleryItem(documentId: ID!): DeleteMutationResponse
+  updateGeneral(status: PublicationStatus = PUBLISHED, data: GeneralInput!): General
+  deleteGeneral: DeleteMutationResponse
+  updateHero(status: PublicationStatus = PUBLISHED, data: HeroInput!): Hero
+  deleteHero: DeleteMutationResponse
+  createService(status: PublicationStatus = PUBLISHED, data: ServiceInput!): Service
+  updateService(documentId: ID!, status: PublicationStatus = PUBLISHED, data: ServiceInput!): Service
+  deleteService(documentId: ID!): DeleteMutationResponse
+  updateWhyChooseUs(status: PublicationStatus = PUBLISHED, data: WhyChooseUsInput!): WhyChooseUs
+  deleteWhyChooseUs: DeleteMutationResponse
+  createWorkExample(status: PublicationStatus = PUBLISHED, data: WorkExampleInput!): WorkExample
+  updateWorkExample(documentId: ID!, status: PublicationStatus = PUBLISHED, data: WorkExampleInput!): WorkExample
+  deleteWorkExample(documentId: ID!): DeleteMutationResponse
+  updateUploadFile(id: ID!, info: FileInfoInput): UploadFile!
+  deleteUploadFile(id: ID!): UploadFile
+
+  """Create a new role"""
+  createUsersPermissionsRole(data: UsersPermissionsRoleInput!): UsersPermissionsCreateRolePayload
+
+  """Update an existing role"""
+  updateUsersPermissionsRole(id: ID!, data: UsersPermissionsRoleInput!): UsersPermissionsUpdateRolePayload
+
+  """Delete an existing role"""
+  deleteUsersPermissionsRole(id: ID!): UsersPermissionsDeleteRolePayload
+
+  """Create a new user"""
+  createUsersPermissionsUser(data: UsersPermissionsUserInput!): UsersPermissionsUserEntityResponse!
+
+  """Update an existing user"""
+  updateUsersPermissionsUser(id: ID!, data: UsersPermissionsUserInput!): UsersPermissionsUserEntityResponse!
+
+  """Delete an existing user"""
+  deleteUsersPermissionsUser(id: ID!): UsersPermissionsUserEntityResponse!
+  login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
+
+  """Register a user"""
+  register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
+
+  """Request a reset password token"""
+  forgotPassword(email: String!): UsersPermissionsPasswordPayload
+
+  """
+  Reset user password. Confirm with a code (resetToken from forgotPassword)
+  """
+  resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
+
+  """Change user password. Confirm with the current password."""
+  changePassword(currentPassword: String!, password: String!, passwordConfirmation: String!): UsersPermissionsLoginPayload
+
+  """Confirm an email users email address"""
+  emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
+}

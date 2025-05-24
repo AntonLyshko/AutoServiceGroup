@@ -1,9 +1,9 @@
 import React from 'react';
 import ServiceCard from './ServiceCard';
-import { Service } from '../data/servicesData';
+import { TransformedService } from '../types/api'; // Импортируем TransformedService
 
 interface ServicesSectionProps {
-	services: Service[];
+	services: TransformedService[]; // Используем TransformedService
 }
 
 const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) => {
@@ -23,11 +23,11 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) => {
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
 					{services.map((service, index) => (
 						<ServiceCard
-							key={service.id}
-							id={service.id}
+							key={service.id} // service.id это слаг
+							id={service.id} // Передаем слаг для Link
 							title={service.title}
 							description={service.shortDescription}
-							imageUrl={service.imageUrl}
+							imageUrl={service.imageUrl} // Уже полный URL
 							index={index}
 						/>
 					))}
