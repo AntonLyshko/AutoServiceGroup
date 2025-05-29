@@ -9,6 +9,7 @@ import {
 } from '../types/api';
 import ImageCompare from '../components/ImageCompare';
 import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import Loader from '../components/Loader';
 
 const WorkExamplePage = () => {
 	const navigate = useNavigate();
@@ -32,6 +33,7 @@ const WorkExamplePage = () => {
 	);
 
 	const openModal = (index: number) => {
+		// Убедимся, что workExampleData существует перед доступом к galleryItems
 		if (
 			workExampleData &&
 			index >= 0 &&
@@ -52,7 +54,7 @@ const WorkExamplePage = () => {
 			return;
 		setActiveItemIndex((prevIndex) =>
 			prevIndex !== null
-				? (prevIndex + 1) % workExampleData.galleryItems.length
+				? (prevIndex + 1) % workExampleData.galleryItems.length // workExampleData здесь точно существует
 				: null
 		);
 	}, [activeItemIndex, workExampleData]);
@@ -62,7 +64,7 @@ const WorkExamplePage = () => {
 			return;
 		setActiveItemIndex((prevIndex) =>
 			prevIndex !== null
-				? (prevIndex - 1 + workExampleData.galleryItems.length) %
+				? (prevIndex - 1 + workExampleData.galleryItems.length) % // workExampleData здесь точно существует
 				  workExampleData.galleryItems.length
 				: null
 		);
@@ -79,19 +81,60 @@ const WorkExamplePage = () => {
 		return () => window.removeEventListener('keydown', handleKeyDown);
 	}, [activeItemIndex, closeModal, nextItem, prevItem]);
 
-	if (isLoading) {
+	if (isLoading && !workExampleData) {
 		return (
 			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-white flex justify-center items-center'>
-				Загрузка проекта...
+				<Loader size='xl' text='Загрузка проекта...' />
 			</div>
 		);
 	}
 
-	if (error || !workExampleData) {
+	if (error) {
+		console.error('Ошибка загрузки проекта:', error);
 		return (
-			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center'>
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
 				<h2 className='text-3xl font-bold text-white mb-4'>
-					Проект не найден или произошла ошибка
+					Ошибка загрузки проекта
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Не удалось загрузить данные о проекте. Пожалуйста, попробуйте
+					позже.
+				</p>
+				<Link
+					to='/gallery'
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md'
+				>
+					Ко всем работам
+				</Link>
+			</div>
+		);
+	}
+
+	if (!isLoading && !workExampleData) {
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Проект не найден
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Запрошенный проект не существует или был удален.
+				</p>
+				<Link
+					to='/gallery'
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md'
+				>
+					Ко всем работам
+				</Link>
+			</div>
+		);
+	}
+
+	if (!workExampleData) {
+		// Этот return защищает от ошибок TypeScript ниже
+		return (
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Данные о проекте отсутствуют
 				</h2>
 				<Link
 					to='/gallery'
@@ -105,7 +148,7 @@ const WorkExamplePage = () => {
 
 	const activeModalItem: TransformedGalleryItem | null =
 		activeItemIndex !== null &&
-		workExampleData.galleryItems[activeItemIndex]
+		workExampleData.galleryItems[activeItemIndex] // workExampleData здесь точно существует
 			? workExampleData.galleryItems[activeItemIndex]
 			: null;
 
@@ -145,7 +188,7 @@ const WorkExamplePage = () => {
 				</div>
 
 				{workExampleData.galleryItems.length === 0 && (
-					<p className='text-center text-gray-400'>
+					<p className='text-center text-gray-400 text-lg py-10'>
 						Для этого проекта пока нет изображений в галерее.
 					</p>
 				)}
@@ -215,7 +258,7 @@ const WorkExamplePage = () => {
 				</div>
 			</div>
 
-			{activeModalItem && (
+			{activeModalItem && ( // activeModalItem проверяется, workExampleData здесь уже точно существует
 				<div
 					className='fixed inset-0 bg-black/90 z-[100] flex flex-col p-4 md:p-8 items-center justify-center'
 					onClick={closeModal}

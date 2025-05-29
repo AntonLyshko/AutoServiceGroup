@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchCarsForSalePreview } from '../services/apiService';
 import { TransformedCarPreview } from '../types/api';
 import CarCard from './CarCard';
+import Loader from './Loader'; // Импорт Loader
 
 const CarsForSaleSection = () => {
 	const {
@@ -14,17 +15,19 @@ const CarsForSaleSection = () => {
 		queryFn: fetchCarsForSalePreview,
 	});
 
-	if (isLoading) {
+	if (isLoading && !cars) {
+		// Показываем лоадер, если идет загрузка и данных еще нет
 		return (
 			<section className='py-20 bg-gray-900'>
-				<div className='container mx-auto px-4 text-center text-white'>
-					Загрузка автомобилей...
+				<div className='container mx-auto px-4 flex justify-center items-center h-64'>
+					<Loader size='lg' text='Загрузка автомобилей...' />
 				</div>
 			</section>
 		);
 	}
 
-	if (error) {
+	if (error && !cars) {
+		// Показываем ошибку, если есть ошибка и данных нет
 		return (
 			<section className='py-20 bg-gray-900'>
 				<div className='container mx-auto px-4 text-center text-red-500'>

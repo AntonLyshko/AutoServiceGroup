@@ -3,7 +3,7 @@ import Hero from '../components/Hero';
 import GalleryPreview from '../components/GalleryPreview';
 import Contact from '../components/Contact';
 import ServicesSection from '../components/ServicesSection';
-import CarsForSaleSection from '../components/CarsForSaleSection'; // Новый импорт
+import CarsForSaleSection from '../components/CarsForSaleSection';
 import { useQuery } from '@tanstack/react-query';
 import {
 	fetchServices,
@@ -14,6 +14,7 @@ import {
 	TransformedWhyChooseUsData,
 } from '../types/api';
 import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import Loader from '../components/Loader'; // Импорт Loader
 
 const Home = () => {
 	const {
@@ -34,23 +35,36 @@ const Home = () => {
 		queryFn: fetchWhyChooseUsData,
 	});
 
-	if (isLoadingServices || isLoadingWhyChooseUs) {
+	// Показываем лоадер, если хотя бы один из основных запросов в процессе и для него еще нет данных
+	if (
+		(isLoadingServices && !servicesData) ||
+		(isLoadingWhyChooseUs && !whyChooseUsData)
+	) {
 		return (
 			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center'>
-				Загрузка данных...
+				<Loader size='xl' text='Загрузка данных...' />
 			</div>
 		);
 	}
 
-	if (errorServices || errorWhyChooseUs) {
+	// Показываем ошибку, если любой из основных запросов завершился с ошибкой и для него нет данных
+	if (
+		(errorServices && !servicesData) ||
+		(errorWhyChooseUs && !whyChooseUsData)
+	) {
 		console.error('Ошибка загрузки услуг:', errorServices);
 		console.error(
 			'Ошибка загрузки данных "Почему выбирают нас":',
 			errorWhyChooseUs
 		);
 		return (
-			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center'>
-				Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+			<div className='min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center text-center px-4'>
+				<h2 className='text-2xl font-bold mb-4'>
+					Ошибка загрузки данных.
+				</h2>
+				<p className='text-gray-300'>
+					Пожалуйста, попробуйте обновить страницу или зайдите позже.
+				</p>
 			</div>
 		);
 	}
@@ -89,11 +103,20 @@ const Home = () => {
 					</div>
 				</section>
 			)}
+			{/* Если servicesData еще грузятся (но whyChooseUsData уже есть), ServicesSection покажет свой внутренний лоадер, если он там есть, или просто не отрендерится */}
 			{actualServices.length > 0 && (
 				<ServicesSection services={actualServices} />
 			)}
+			{/* Если ServicesSection не имеет своего лоадера для isLoading && !data, можно добавить здесь: */}
+			{isLoadingServices && !actualServices.length && (
+				<section className='py-20 bg-gray-900'>
+					<div className='container mx-auto px-4 flex justify-center items-center h-64'>
+						<Loader size='lg' text='Загрузка услуг...' />
+					</div>
+				</section>
+			)}
 			<GalleryPreview />
-			<CarsForSaleSection /> {/* Новая секция добавлена здесь */}
+			<CarsForSaleSection />
 			<Contact />
 		</div>
 	);

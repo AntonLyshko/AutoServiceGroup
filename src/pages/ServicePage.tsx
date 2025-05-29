@@ -9,7 +9,8 @@ import {
 import { TransformedService, TransformedGeneralData } from '../types/api';
 import Contact from '../components/Contact';
 import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
-import { formatPhoneNumberForTelLink } from '../lib/utils'; // Импортируем форматер для tel: ссылок
+import { formatPhoneNumberForTelLink } from '../lib/utils';
+import Loader from '../components/Loader';
 
 const ServicePage: React.FC = () => {
 	const navigate = useNavigate();
@@ -34,19 +35,60 @@ const ServicePage: React.FC = () => {
 			queryFn: fetchGeneralData,
 		});
 
-	if (isLoadingService) {
+	if (isLoadingService && !service) {
 		return (
 			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
-				Загрузка услуги...
+				<Loader size='xl' text='Загрузка услуги...' />
 			</div>
 		);
 	}
 
-	if (errorService || !service) {
+	if (errorService) {
+		console.error('Ошибка загрузки услуги:', errorService);
 		return (
-			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center'>
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
 				<h2 className='text-3xl font-bold text-white mb-4'>
-					{errorService ? 'Ошибка загрузки услуги' : 'Услуга не найдена'}
+					Ошибка загрузки услуги
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Не удалось загрузить данные об услуге. Пожалуйста, попробуйте
+					позже.
+				</p>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	if (!isLoadingService && !service) {
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Услуга не найдена
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Запрошенная услуга не существует или была удалена.
+				</p>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	if (!service) {
+		// Этот return защищает от ошибок TypeScript ниже
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Данные об услуге отсутствуют
 				</h2>
 				<button
 					onClick={() => navigate('/')}
@@ -59,11 +101,11 @@ const ServicePage: React.FC = () => {
 	}
 
 	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone); // Форматируем для tel: ссылки
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
 
 	const displayAddress =
 		generalData?.address || 'Березовский, Транспортников 42А';
-	const whatsAppNumber = generalData?.whatsappPhone || '79655118585'; // generalData.whatsappPhone уже отформатирован в apiService
+	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
 	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
 
 	return (
@@ -116,13 +158,19 @@ const ServicePage: React.FC = () => {
 								Для получения консультации или записи на сервис напишите
 								нам в WhatsApp или позвоните.
 							</p>
-							{isLoadingGeneral ? (
+							{isLoadingGeneral && !generalData ? (
 								<div className='space-y-4'>
-									<div className='block w-full bg-green-600 text-white text-center font-semibold py-3 rounded-md opacity-50'>
-										Загрузка...
+									<div className='block w-full bg-green-600 text-white text-center font-semibold py-3 rounded-md opacity-70 h-[48px] flex items-center justify-center'>
+										<Loader
+											size='xs'
+											spinnerClassName='border-white border-t-transparent'
+										/>
 									</div>
-									<div className='block w-full bg-red-600 text-white text-center font-semibold py-3 rounded-md opacity-50'>
-										Загрузка...
+									<div className='block w-full bg-red-600 text-white text-center font-semibold py-3 rounded-md opacity-70 h-[48px] flex items-center justify-center'>
+										<Loader
+											size='xs'
+											spinnerClassName='border-white border-t-transparent'
+										/>
 									</div>
 								</div>
 							) : (
@@ -131,14 +179,14 @@ const ServicePage: React.FC = () => {
 										href={whatsAppLink}
 										target='_blank'
 										rel='noopener noreferrer'
-										className='block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center'
+										className='block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center h-[48px]'
 									>
 										<MessageCircle className='mr-2' size={20} />
 										Написать в WhatsApp
 									</a>
 									<a
-										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для tel: ссылки
-										className='block w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center'
+										href={`tel:${telLinkPhone}`}
+										className='block w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center h-[48px]'
 									>
 										<PhoneCall className='mr-2' size={20} />
 										Позвонить
@@ -147,8 +195,14 @@ const ServicePage: React.FC = () => {
 							)}
 							<div className='text-gray-400 text-sm mt-4'>
 								<p className='mb-2'>Часы работы: 10:00-22:00</p>
-								{isLoadingGeneral ? (
-									<p>Загрузка адреса...</p>
+								{isLoadingGeneral && !generalData ? (
+									<div className='flex items-center h-5'>
+										<Loader
+											size='xs'
+											spinnerClassName='border-gray-400 border-t-transparent'
+										/>
+										<span className='ml-2'>Загрузка адреса...</span>
+									</div>
 								) : (
 									<p>Адрес: {displayAddress}</p>
 								)}

@@ -1,19 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-	PhoneCall,
-	Clock,
-	MapPin,
-	// Instagram, // Убрали импорт Instagram
-	// Facebook, // Убрали импорт Facebook
-} from 'lucide-react';
+import { PhoneCall, Clock, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchGeneralData } from '../services/apiService';
 import { TransformedGeneralData } from '../types/api';
 import {
 	formatDisplayPhoneNumber,
 	formatPhoneNumberForTelLink,
-} from '../lib/utils'; // Импортируем функции форматирования
+} from '../lib/utils';
+import Loader from './Loader'; // Импорт Loader
 
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
@@ -46,23 +41,6 @@ const Footer = () => {
 							Профессиональный ремонт и обслуживание автомобилей любых
 							марок с использованием современного оборудования
 						</p>
-						{/* Блок с иконками социальных сетей удален */}
-						{/* 
-                        <div className='flex space-x-4'>
-							<a
-								href='#'
-								className='text-gray-400 hover:text-red-500 transition-colors'
-							>
-								<Instagram size={24} />
-							</a>
-							<a
-								href='#'
-								className='text-gray-400 hover:text-red-500 transition-colors'
-							>
-								<Facebook size={24} />
-							</a>
-						</div>
-                        */}
 					</div>
 
 					<div>
@@ -125,20 +103,19 @@ const Footer = () => {
 						<h3 className='text-xl font-semibold mb-4 text-white'>
 							Контакты
 						</h3>
-						{isLoadingGeneral ? (
-							<div className='space-y-4'>
-								<p className='text-gray-400'>Загрузка контактов...</p>
+						{isLoadingGeneral && !generalData ? (
+							<div className='space-y-4 min-h-[100px] flex items-center'>
+								<Loader size='sm' text='Загрузка контактов...' />
 							</div>
 						) : (
 							<div className='space-y-4'>
 								<div className='flex items-center'>
 									<PhoneCall size={20} className='text-red-500 mr-3' />
 									<a
-										href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+										href={`tel:${telLinkPhone}`}
 										className='text-gray-400 hover:text-red-500 transition-colors'
 									>
-										{displayPhoneFormatted}{' '}
-										{/* Используем отформатированный номер для отображения */}
+										{displayPhoneFormatted}
 									</a>
 								</div>
 								<div className='flex items-center'>

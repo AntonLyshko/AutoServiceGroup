@@ -1,37 +1,50 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchWorkExamplesForPreview } from '../services/apiService'; // Та же функция, что и для GalleryPreview
+import { fetchWorkExamplesForPreview } from '../services/apiService';
 import { TransformedWorkExamplePreviewItem } from '../types/api';
-import ImageCompare from '../components/ImageCompare'; // Для отображения карточек
+import ImageCompare from '../components/ImageCompare';
+import Loader from '../components/Loader'; // Импорт Loader
 
 const Gallery = () => {
 	const navigate = useNavigate();
-	// Используем тот же запрос, что и для GalleryPreview, но отобразим все элементы
 	const {
 		data: workExamples,
 		isLoading,
 		error,
 	} = useQuery<TransformedWorkExamplePreviewItem[]>({
-		queryKey: ['workExamplesPreview'], // Можно использовать тот же ключ, т.к. данные идентичны
+		queryKey: ['workExamplesPreview'],
 		queryFn: fetchWorkExamplesForPreview,
 	});
 
-	if (isLoading) {
+	if (isLoading && !workExamples) {
 		return (
 			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-white flex justify-center items-center'>
-				Загрузка галереи работ...
+				<Loader size='xl' text='Загрузка галереи работ...' />
 			</div>
 		);
 	}
 
-	if (error || !workExamples) {
+	if (error && !workExamples) {
 		return (
-			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-red-500 flex justify-center items-center'>
-				Ошибка загрузки галереи работ.
+			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen text-red-500 flex flex-col justify-center items-center px-4 text-center'>
+				<h2 className='text-2xl font-bold mb-4'>
+					Ошибка загрузки галереи работ.
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Пожалуйста, попробуйте обновить страницу или зайдите позже.
+				</p>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					На главную
+				</button>
 			</div>
 		);
 	}
+
+	// Если workExamples есть (может быть из кеша), рендерим страницу
 
 	return (
 		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
@@ -52,76 +65,79 @@ const Gallery = () => {
 					карточку, чтобы посмотреть все фотографии этого проекта.
 				</p>
 
-				{workExamples.length === 0 && !isLoading && (
-					<p className='text-center text-gray-400'>
+				{(!workExamples || workExamples.length === 0) && !isLoading && (
+					<p className='text-center text-gray-400 py-10 text-lg'>
 						Примеров работ пока нет.
 					</p>
 				)}
 
-				<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10'>
-					{workExamples.map((item) => (
-						<div
-							key={item.workExampleId + (item.id || '')}
-							className='group'
-						>
-							<Link to={`/work-examples/${item.workExampleId}`}>
-								<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800 cursor-pointer'>
-									{item.type === 'single' ? (
-										<>
-											<img
-												src={item.imageUrl}
-												alt={item.title}
-												className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
-												loading='lazy'
+				{workExamples && workExamples.length > 0 && (
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10'>
+						{workExamples.map((item) => (
+							<div
+								key={item.workExampleId + (item.id || '')}
+								className='group'
+							>
+								<Link to={`/work-examples/${item.workExampleId}`}>
+									<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800 cursor-pointer'>
+										{item.type === 'single' ? (
+											<>
+												<img
+													src={item.imageUrl}
+													alt={item.title}
+													className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+													loading='lazy'
+												/>
+												<div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none'>
+													<svg
+														xmlns='http://www.w3.org/2000/svg'
+														fill='none'
+														viewBox='0 0 24 24'
+														strokeWidth={1.5}
+														stroke='white'
+														className='w-12 h-12'
+													>
+														<path
+															strokeLinecap='round'
+															strokeLinejoin='round'
+															d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'
+														/>
+													</svg>
+												</div>
+											</>
+										) : (
+											<ImageCompare
+												beforeImage={item.beforeImage}
+												afterImage={item.afterImage}
+												altBefore={`До - ${item.title}`}
+												altAfter={`После - ${item.title}`}
 											/>
-											<div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none'>
-												<svg
-													xmlns='http://www.w3.org/2000/svg'
-													fill='none'
-													viewBox='0 0 24 24'
-													strokeWidth={1.5}
-													stroke='white'
-													className='w-12 h-12'
-												>
-													<path
-														strokeLinecap='round'
-														strokeLinejoin='round'
-														d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'
-													/>
-												</svg>
-											</div>
-										</>
-									) : (
-										<ImageCompare
-											beforeImage={item.beforeImage}
-											afterImage={item.afterImage}
-											altBefore={`До - ${item.title}`}
-											altAfter={`После - ${item.title}`}
-										/>
-									)}
+										)}
+									</div>
+								</Link>
+								<div>
+									<h4 className='text-lg font-semibold text-white mb-1'>
+										<Link
+											to={`/work-examples/${item.workExampleId}`}
+											className='hover:text-red-500'
+										>
+											{item.originalTitle}
+										</Link>
+										{item.type === 'beforeAfter' && (
+											<span className='text-sm text-gray-400 ml-2'>
+												(До/После)
+											</span>
+										)}
+									</h4>
+									<p className='text-gray-300 text-sm'>
+										{item.description}
+									</p>
 								</div>
-							</Link>
-							<div>
-								<h4 className='text-lg font-semibold text-white mb-1'>
-									<Link
-										to={`/work-examples/${item.workExampleId}`}
-										className='hover:text-red-500'
-									>
-										{item.originalTitle}
-									</Link>
-									{item.type === 'beforeAfter' && (
-										<span className='text-sm text-gray-400 ml-2'>
-											(До/После)
-										</span>
-									)}
-								</h4>
-								<p className='text-gray-300 text-sm'>{item.description}</p>
 							</div>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				)}
 			</div>
-			{/* Модальное окно удалено отсюда, оно будет на странице WorkExamplePage */}
 		</div>
 	);
 };

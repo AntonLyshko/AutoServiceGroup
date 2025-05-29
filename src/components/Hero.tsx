@@ -3,7 +3,7 @@ import { ChevronDown, MessageCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchHeroData, fetchGeneralData } from '../services/apiService';
 import { TransformedHeroData, TransformedGeneralData } from '../types/api';
-// import heroBackgroundImage from '../img/img_1.webp'; // Удаляем статический импорт
+import Loader from './Loader'; // Импорт Loader
 
 const Hero = () => {
 	const {
@@ -28,26 +28,32 @@ const Hero = () => {
 		});
 	};
 
-	// Значения по умолчанию, если данные еще грузятся или есть ошибка
-	let title = 'Автосервис';
-	let secondTitle = 'ТрейдАвто-групп';
-	let description =
-		'Профессиональный ремонт и обслуживание автомобилей любых марок с использованием современного оборудования и оригинальных запчастей';
-	let heroBackgroundImageUrl = '/img/img_1.webp'; // Запасное локальное изображение по умолчанию
+	// Если основные данные для Hero еще не загружены (и нет данных в кеше)
+	if (isLoadingHero && !heroData) {
+		return (
+			<div
+				className='relative h-screen w-full bg-gray-900 flex items-center justify-center'
+				// Можно оставить дефолтный фон для плавности, если есть изображение по умолчанию в CSS или здесь
+				// style={{ backgroundImage: `url(/img/img_1.webp)` }}
+			>
+				<Loader size='xl' text='Загрузка...' textColor='text-white' />
+			</div>
+		);
+	}
 
-	if (isLoadingHero) {
-		title = 'Загрузка...';
-		secondTitle = '';
-		description = 'Пожалуйста, подождите.';
-		// Пока данные грузятся, можно оставить запасное изображение или не устанавливать фон вообще
-	} else if (errorHero) {
+	// Значения по умолчанию используются, если heroData еще не пришло, или пришло null (обработано в apiService)
+	const title = heroData?.title || 'Автосервис';
+	const secondTitle = heroData?.secondTitle || 'ТрейдАвто-групп';
+	const description =
+		heroData?.description ||
+		'Профессиональный ремонт и обслуживание автомобилей любых марок с использованием современного оборудования и оригинальных запчастей';
+	const heroBackgroundImageUrl =
+		heroData?.backgroundImageUrl || '/img/img_1.webp';
+
+	if (errorHero && !heroData) {
+		// Если ошибка и данных по-прежнему нет
 		console.error('Ошибка загрузки данных для Hero:', errorHero);
-		// Используем значения по умолчанию и запасное изображение
-	} else if (heroData) {
-		title = heroData.title;
-		secondTitle = heroData.secondTitle;
-		description = heroData.description;
-		heroBackgroundImageUrl = heroData.backgroundImageUrl; // Используем URL с бэкенда
+		// Используем значения по умолчанию, установленные выше
 	}
 
 	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
@@ -55,9 +61,9 @@ const Hero = () => {
 
 	return (
 		<div
-			className='relative h-screen w-full bg-cover bg-center flex items-center transition-all duration-500' // Добавил transition для плавности смены фона
+			className='relative h-screen w-full bg-cover bg-center flex items-center transition-all duration-500'
 			style={{
-				backgroundImage: `url(${heroBackgroundImageUrl})`, // Используем динамический URL
+				backgroundImage: `url(${heroBackgroundImageUrl})`,
 				backgroundPosition: 'center',
 				backgroundSize: 'cover',
 			}}
@@ -76,17 +82,19 @@ const Hero = () => {
 					{description}
 				</p>
 				<div className='flex flex-col sm:flex-row justify-center gap-4'>
-					{isLoadingGeneral ? (
-						<div className='py-3 px-8 bg-green-600 text-white font-semibold rounded-md flex items-center justify-center opacity-50'>
-							<MessageCircle className='mr-2' size={20} />
-							Загрузка...
+					{isLoadingGeneral && !generalData ? (
+						<div className='py-3 px-8 bg-green-600 text-white font-semibold rounded-md flex items-center justify-center opacity-80 min-w-[230px] h-[48px]'>
+							<Loader
+								size='xs'
+								spinnerClassName='border-white border-t-transparent'
+							/>
 						</div>
 					) : (
 						<a
 							href={whatsAppLink}
 							target='_blank'
 							rel='noopener noreferrer'
-							className='py-3 px-8 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors duration-300 flex items-center justify-center'
+							className='py-3 px-8 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors duration-300 flex items-center justify-center min-w-[230px] h-[48px]'
 						>
 							<MessageCircle className='mr-2' size={20} />
 							Написать в WhatsApp

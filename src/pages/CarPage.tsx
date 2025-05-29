@@ -15,7 +15,8 @@ import {
 } from '../types/api';
 import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
 import Contact from '../components/Contact';
-import { formatPhoneNumberForTelLink } from '../lib/utils'; // Импортируем форматер для tel: ссылок
+import { formatPhoneNumberForTelLink } from '../lib/utils';
+import Loader from '../components/Loader';
 
 const CarPage: React.FC = () => {
 	const navigate = useNavigate();
@@ -28,10 +29,10 @@ const CarPage: React.FC = () => {
 	} = useQuery<TransformedCarPageData | null>({
 		queryKey: ['carPageData', carId],
 		queryFn: () => {
-			if (!carId) return Promise.resolve(null);
+			if (!carId) return Promise.resolve(null); // Если нет carId, не делаем запрос
 			return fetchCarById(carId);
 		},
-		enabled: !!carId,
+		enabled: !!carId, // Запрос выполняется только если carId существует
 	});
 
 	const { data: generalData, isLoading: isLoadingGeneral } =
@@ -46,8 +47,79 @@ const CarPage: React.FC = () => {
 		setCurrentImageIndex(0);
 	}, [carId]);
 
-	const mainImage = car?.images[currentImageIndex]?.url;
-	const totalImages = car?.images?.length || 0;
+	// 1. Состояние начальной загрузки (когда `car` еще `undefined` или `null` и `isLoadingCar` true)
+	if (isLoadingCar && !car) {
+		return (
+			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
+				<Loader size='xl' text='Загрузка информации об автомобиле...' />
+			</div>
+		);
+	}
+
+	// 2. Состояние ошибки (когда `errorCar` есть)
+	if (errorCar) {
+		console.error('Ошибка загрузки автомобиля:', errorCar);
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Ошибка загрузки
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Не удалось загрузить данные об автомобиле. Пожалуйста, попробуйте
+					позже.
+				</p>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	// 3. Состояние, когда загрузка завершена, ошибки нет, но `car` все равно `null` или `undefined`
+	// Это означает, что автомобиль не найден или carId был некорректен.
+	if (!isLoadingCar && !car) {
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Автомобиль не найден
+				</h2>
+				<p className='text-gray-300 mb-6'>
+					Запрошенный автомобиль не существует или был удален.
+				</p>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	// Если мы дошли до сюда, а car всё еще null (этот блок для TypeScript, логически не должен достигаться при правильной обработке выше)
+	if (!car) {
+		// Можно вернуть null или более общее сообщение об ошибке/ненайденном ресурсе
+		// Этот return защищает от ошибок TypeScript ниже
+		return (
+			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
+				<h2 className='text-3xl font-bold text-white mb-4'>
+					Данные об автомобиле отсутствуют
+				</h2>
+				<button
+					onClick={() => navigate('/')}
+					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
+				>
+					Вернуться на главную
+				</button>
+			</div>
+		);
+	}
+
+	const mainImage = car.images[currentImageIndex]?.url;
+	const totalImages = car.images?.length || 0;
 
 	const goToNextImage = useCallback(() => {
 		if (totalImages > 0) {
@@ -65,7 +137,7 @@ const CarPage: React.FC = () => {
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (!car || totalImages <= 1) return;
+			if (totalImages <= 1) return; // car здесь точно существует
 
 			if (event.key === 'ArrowRight') {
 				goToNextImage();
@@ -80,38 +152,14 @@ const CarPage: React.FC = () => {
 		};
 	}, [car, totalImages, goToNextImage, goToPrevImage]);
 
-	if (isLoadingCar) {
-		return (
-			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
-				Загрузка информации об автомобиле...
-			</div>
-		);
-	}
-
-	if (errorCar || !car) {
-		return (
-			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					{errorCar ? 'Ошибка загрузки' : 'Автомобиль не найден'}
-				</h2>
-				<button
-					onClick={() => navigate('/')}
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
-				>
-					Вернуться на главную
-				</button>
-			</div>
-		);
-	}
-
 	const handleThumbnailClick = (index: number) => {
 		setCurrentImageIndex(index);
 	};
 
 	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone); // Форматируем для tel: ссылки
+	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
 
-	const whatsAppNumber = generalData?.whatsappPhone || '79655118585'; // generalData.whatsappPhone уже отформатирован в apiService
+	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
 	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
 
 	return (
@@ -138,7 +186,11 @@ const CarPage: React.FC = () => {
 								/>
 							) : (
 								<div className='w-full h-full flex items-center justify-center text-gray-500'>
-									{totalImages > 0 ? 'Загрузка...' : 'Нет изображений'}
+									{totalImages > 0 ? (
+										<Loader size='md' text='Загрузка изображения...' />
+									) : (
+										'Нет изображений'
+									)}
 								</div>
 							)}
 
@@ -194,20 +246,26 @@ const CarPage: React.FC = () => {
 							{car.cost}
 						</p>
 
-						{isLoadingGeneral ? (
+						{isLoadingGeneral && !generalData ? (
 							<div className='space-y-4 mb-8'>
-								<div className='w-full flex items-center justify-center bg-red-600 text-white font-semibold py-3 px-6 rounded-md opacity-50'>
-									Загрузка...
+								<div className='w-full flex items-center justify-center bg-red-600 text-white font-semibold py-3 px-6 rounded-md opacity-70 h-[48px]'>
+									<Loader
+										size='xs'
+										spinnerClassName='border-white border-t-transparent'
+									/>
 								</div>
-								<div className='w-full flex items-center justify-center bg-green-600 text-white font-semibold py-3 px-6 rounded-md opacity-50'>
-									Загрузка...
+								<div className='w-full flex items-center justify-center bg-green-600 text-white font-semibold py-3 px-6 rounded-md opacity-70 h-[48px]'>
+									<Loader
+										size='xs'
+										spinnerClassName='border-white border-t-transparent'
+									/>
 								</div>
 							</div>
 						) : (
 							<div className='space-y-4 mb-8'>
 								<a
-									href={`tel:${telLinkPhone}`} // Используем отформатированный номер для tel: ссылки
-									className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300'
+									href={`tel:${telLinkPhone}`}
+									className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 h-[48px]'
 								>
 									<PhoneCall size={20} className='mr-2' />
 									Позвонить
@@ -216,7 +274,7 @@ const CarPage: React.FC = () => {
 									href={whatsAppLink}
 									target='_blank'
 									rel='noopener noreferrer'
-									className='w-full flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300'
+									className='w-full flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 h-[48px]'
 								>
 									<MessageCircle size={20} className='mr-2' />
 									Написать в WhatsApp

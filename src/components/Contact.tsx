@@ -6,7 +6,8 @@ import { TransformedGeneralData } from '../types/api';
 import {
 	formatDisplayPhoneNumber,
 	formatPhoneNumberForTelLink,
-} from '../lib/utils'; // Импортируем функции форматирования
+} from '../lib/utils';
+import Loader from './Loader'; // Импорт Loader
 
 const Contact = () => {
 	const { data: generalData, isLoading: isLoadingGeneral } =
@@ -15,21 +16,14 @@ const Contact = () => {
 			queryFn: fetchGeneralData,
 		});
 
-	// Используем телефон из generalData или дефолтный
 	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	// Форматируем для отображения
 	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
-	// Форматируем для tel: ссылки
 	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
 
 	const displayAddress =
 		generalData?.address || 'Березовский, Транспортников 42А';
 
-	// Формируем URL для Google Maps iframe с использованием displayAddress
-	// Кодируем адрес для URL
 	const encodedAddress = encodeURIComponent(displayAddress);
-	// Базовый URL с параметром pb, который определяет начальный вид карты.
-	// Добавляем параметр q с кодированным адресом.
 	const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2181.6180769263375!2d60.8088433!3d56.911438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x43c16ef7c6fa7b47%3A0xa7e554c1ab3edbd8!2z0YPQuy4g0KLRgNCw0L3RgdC_0L7RgNGC0L3QuNC60L7QsiwgNDLQkCwg0JHQtdGA0ZHQt9C-0LLRgdC60LjQuSwg0KHQstC10YDQtNC70L7QstGB0LrQsNGPINC-0LHQuy4sIDYyMzcwMg!5e0!3m2!1sru!2sru!4v1716915066364!5m2!1sru!2sru&q=${encodedAddress}`;
 
 	return (
@@ -50,9 +44,9 @@ const Contact = () => {
 						<h3 className='text-2xl font-bold text-white mb-6'>
 							Наши контакты
 						</h3>
-						{isLoadingGeneral ? (
-							<div className='space-y-6'>
-								<p className='text-gray-300'>Загрузка контактов...</p>
+						{isLoadingGeneral && !generalData ? (
+							<div className='space-y-6 flex justify-center items-center min-h-[200px]'>
+								<Loader size='md' text='Загрузка контактов...' />
 							</div>
 						) : (
 							<div className='space-y-6'>
@@ -65,11 +59,10 @@ const Contact = () => {
 											Телефон
 										</h4>
 										<a
-											href={`tel:${telLinkPhone}`} // Используем отформатированный номер для ссылки
+											href={`tel:${telLinkPhone}`}
 											className='text-gray-300 hover:text-red-500 transition-colors'
 										>
-											{displayPhoneFormatted}{' '}
-											{/* Используем отформатированный номер для отображения */}
+											{displayPhoneFormatted}
 										</a>
 									</div>
 								</div>
@@ -102,13 +95,13 @@ const Contact = () => {
 					</div>
 
 					<div className='h-[400px] rounded-lg overflow-hidden shadow-lg'>
-						{isLoadingGeneral ? (
-							<div className='w-full h-full flex items-center justify-center bg-gray-700 text-white'>
-								Загрузка карты...
+						{isLoadingGeneral && !generalData ? ( // Используем то же условие для карты, так как адрес зависит от generalData
+							<div className='w-full h-full flex items-center justify-center bg-gray-700'>
+								<Loader size='lg' text='Загрузка карты...' />
 							</div>
 						) : (
 							<iframe
-								src={mapSrc} // Используем динамически сгенерированный URL
+								src={mapSrc}
 								width='100%'
 								height='100%'
 								style={{ border: 0 }}
