@@ -15,10 +15,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 	title,
 	description,
 	imageUrl,
-	index,
 }) => {
-	// const isEven = index % 2 === 0; // Переменная isEven больше не используется в стилях
-
 	return (
 		<div
 			className={`relative overflow-hidden bg-gray-800 rounded-lg group transition-all duration-300 hover:shadow-[0_0_15px_rgba(220,38,38,0.3)] h-[300px] md:h-[400px]`}
@@ -35,7 +32,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 				<h3 className='text-2xl md:text-3xl font-bold text-white mb-3 group-hover:text-red-500 transition-colors duration-300'>
 					{title}
 				</h3>
-				{/* Добавлен класс text-base для увеличения шрифта описания */}
 				<p className='text-gray-300 mb-6 max-w-md text-lg'>
 					{description}
 				</p>

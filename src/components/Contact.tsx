@@ -1,29 +1,25 @@
 import React from 'react';
 import { PhoneCall, Clock, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchGeneralData } from '../services/apiService';
-import { TransformedGeneralData } from '../types/api';
-import {
-	formatDisplayPhoneNumber,
-	formatPhoneNumberForTelLink,
-} from '../lib/utils';
-import Loader from './Loader'; // Импорт Loader
+import { fetchSettings } from '../services/apiService';
+import { SiteSettings } from '../types/api';
+import Loader from './Loader';
 
 const Contact = () => {
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
+	const { data: settings, isLoading: isLoadingSettings } =
+		useQuery<SiteSettings | null>({
+			queryKey: ['siteSettings'],
+			queryFn: fetchSettings,
 		});
 
-	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+	const phoneLink = settings?.phoneLink || '#';
+	const displayPhone = settings?.phoneNumber || 'Загрузка...';
+	const displayAddress = settings?.address || 'Загрузка...';
+	const displayWorkingHours = settings?.workingHours || '10:00-22:00';
 
-	const displayAddress =
-		generalData?.address || 'Березовский, Транспортников 42А';
-
-	const encodedAddress = encodeURIComponent(displayAddress);
+	const encodedAddress = encodeURIComponent(
+		displayAddress || 'Березовский, Транспортников 42А'
+	);
 	const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2181.6180769263375!2d60.8088433!3d56.911438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x43c16ef7c6fa7b47%3A0xa7e554c1ab3edbd8!2z0YPQuy4g0KLRgNCw0L3RgdC_0L7RgNGC0L3QuNC60L7QsiwgNDLQkCwg0JHQtdGA0ZHQt9C-0LLRgdC60LjQuSwg0KHQstC10YDQtNC70L7QstGB0LrQsNGPINC-0LHQuy4sIDYyMzcwMg!5e0!3m2!1sru!2sru!4v1716915066364!5m2!1sru!2sru&q=${encodedAddress}`;
 
 	return (
@@ -44,7 +40,7 @@ const Contact = () => {
 						<h3 className='text-2xl font-bold text-white mb-6'>
 							Наши контакты
 						</h3>
-						{isLoadingGeneral && !generalData ? (
+						{isLoadingSettings && !settings ? (
 							<div className='space-y-6 flex justify-center items-center min-h-[200px]'>
 								<Loader size='md' text='Загрузка контактов...' />
 							</div>
@@ -59,10 +55,10 @@ const Contact = () => {
 											Телефон
 										</h4>
 										<a
-											href={`tel:${telLinkPhone}`}
+											href={phoneLink}
 											className='text-gray-300 hover:text-red-500 transition-colors'
 										>
-											{displayPhoneFormatted}
+											{displayPhone}
 										</a>
 									</div>
 								</div>
@@ -75,7 +71,7 @@ const Contact = () => {
 										<h4 className='text-lg font-semibold text-white'>
 											Часы работы
 										</h4>
-										<p className='text-gray-300'>Ежедневно: 10:00-22:00</p>
+										<p className='text-gray-300'>{displayWorkingHours}</p>
 									</div>
 								</div>
 
@@ -95,7 +91,7 @@ const Contact = () => {
 					</div>
 
 					<div className='h-[400px] rounded-lg overflow-hidden shadow-lg'>
-						{isLoadingGeneral && !generalData ? ( // Используем то же условие для карты, так как адрес зависит от generalData
+						{isLoadingSettings && !settings ? (
 							<div className='w-full h-full flex items-center justify-center bg-gray-700'>
 								<Loader size='lg' text='Загрузка карты...' />
 							</div>

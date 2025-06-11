@@ -1,20 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchWorkExamplesForPreview } from '../services/apiService';
-import { TransformedWorkExamplePreviewItem } from '../types/api';
+import { fetchWorkExamples } from '../services/apiService';
+import { TransformedWorkExamplePreview } from '../types/api';
 import ImageCompare from '../components/ImageCompare';
-import Loader from '../components/Loader'; // Импорт Loader
+import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
 
 const Gallery = () => {
 	const navigate = useNavigate();
+	const { isLoggedIn } = useAuth();
 	const {
 		data: workExamples,
 		isLoading,
 		error,
-	} = useQuery<TransformedWorkExamplePreviewItem[]>({
-		queryKey: ['workExamplesPreview'],
-		queryFn: fetchWorkExamplesForPreview,
+	} = useQuery<TransformedWorkExamplePreview[]>({
+		queryKey: ['workExamples'],
+		queryFn: fetchWorkExamples,
 	});
 
 	if (isLoading && !workExamples) {
@@ -44,8 +46,6 @@ const Gallery = () => {
 		);
 	}
 
-	// Если workExamples есть (может быть из кеша), рендерим страницу
-
 	return (
 		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
 			<div className='container mx-auto px-4 py-16'>
@@ -57,9 +57,20 @@ const Gallery = () => {
 					Назад на главную
 				</button>
 
-				<h1 className='text-4xl font-bold text-white mb-6'>
-					Галерея наших работ
-				</h1>
+				<div className='relative'>
+					<h1 className='text-4xl font-bold text-white mb-6'>
+						Галерея наших работ
+					</h1>
+					{isLoggedIn && (
+						<Link
+							to='/admin/work-examples/new'
+							className='absolute top-0 right-0 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center gap-2'
+						>
+							<PlusCircle size={20} />
+							Создать
+						</Link>
+					)}
+				</div>
 				<p className='text-gray-300 mb-12 max-w-3xl'>
 					Здесь вы можете увидеть примеры наших работ. Кликните на любую
 					карточку, чтобы посмотреть все фотографии этого проекта.
@@ -74,16 +85,13 @@ const Gallery = () => {
 				{workExamples && workExamples.length > 0 && (
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10'>
 						{workExamples.map((item) => (
-							<div
-								key={item.workExampleId + (item.id || '')}
-								className='group'
-							>
-								<Link to={`/work-examples/${item.workExampleId}`}>
+							<div key={item.id} className='group'>
+								<Link to={`/work-examples/${item.id}`}>
 									<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800 cursor-pointer'>
-										{item.type === 'single' ? (
+										{item.previewImage.type === 'single' ? (
 											<>
 												<img
-													src={item.imageUrl}
+													src={item.previewImage.imageUrl}
 													alt={item.title}
 													className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
 													loading='lazy'
@@ -107,8 +115,8 @@ const Gallery = () => {
 											</>
 										) : (
 											<ImageCompare
-												beforeImage={item.beforeImage}
-												afterImage={item.afterImage}
+												beforeImage={item.previewImage.beforeImage}
+												afterImage={item.previewImage.afterImage}
 												altBefore={`До - ${item.title}`}
 												altAfter={`После - ${item.title}`}
 											/>
@@ -118,12 +126,12 @@ const Gallery = () => {
 								<div>
 									<h4 className='text-lg font-semibold text-white mb-1'>
 										<Link
-											to={`/work-examples/${item.workExampleId}`}
+											to={`/work-examples/${item.id}`}
 											className='hover:text-red-500'
 										>
-											{item.originalTitle}
+											{item.title}
 										</Link>
-										{item.type === 'beforeAfter' && (
+										{item.previewImage.type === 'beforeAfter' && (
 											<span className='text-sm text-gray-400 ml-2'>
 												(До/После)
 											</span>

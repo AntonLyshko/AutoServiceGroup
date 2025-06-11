@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { TransformedCarPreview } from '../types/api';
-import { CarFront } from 'lucide-react'; // Иконка для плейсхолдера или акцента
+import { CarFront } from 'lucide-react';
 
 interface CarCardProps {
 	car: TransformedCarPreview;
@@ -18,7 +18,6 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
 					<img
 						src={car.imageUrl}
 						alt={car.title}
-						// Убраны классы: transition-transform duration-500 group-hover:scale-105
 						className='w-full h-full object-cover'
 						loading='lazy'
 					/>
@@ -27,8 +26,6 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
 						<CarFront size={64} />
 					</div>
 				)}
-				{/* Оверлей можно оставить или убрать, по желанию. Сейчас он немного затемняет картинку при наведении. */}
-				{/* Если хотите убрать и его эффект при наведении, измените opacity-80 group-hover:opacity-90 на просто opacity-80 или другой фиксированный */}
 				<div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300'></div>
 			</div>
 			<div className='p-5'>

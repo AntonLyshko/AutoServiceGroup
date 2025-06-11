@@ -2,29 +2,31 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { PhoneCall, Clock, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchGeneralData } from '../services/apiService';
-import { TransformedGeneralData } from '../types/api';
-import {
-	formatDisplayPhoneNumber,
-	formatPhoneNumberForTelLink,
-} from '../lib/utils';
-import Loader from './Loader'; // Импорт Loader
+import { fetchSettings, fetchServices } from '../services/apiService';
+import { SiteSettings, TransformedService } from '../types/api';
+import Loader from './Loader';
 
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
 
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
+	const { data: settings, isLoading: isLoadingSettings } =
+		useQuery<SiteSettings | null>({
+			queryKey: ['siteSettings'],
+			queryFn: fetchSettings,
 		});
 
-	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+	const { data: services, isLoading: isLoadingServices } = useQuery<
+		TransformedService[]
+	>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
 
-	const displayAddress =
-		generalData?.address || 'Березовский, Транспортников 42А';
+	const phoneLink = settings?.phoneLink || '#';
+	const displayPhone = settings?.phoneNumber || 'Загрузка...';
+	const displayAddress = settings?.address || 'Загрузка...';
+	const displayWorkingHours = settings?.workingHours || '10:00-22:00';
+	const footerServices = services?.slice(0, 6) || [];
 
 	return (
 		<footer className='bg-gray-950 text-white'>
@@ -47,63 +49,36 @@ const Footer = () => {
 						<h3 className='text-xl font-semibold mb-4 text-white'>
 							Услуги
 						</h3>
-						<ul className='space-y-2'>
-							<li>
-								<Link
-									to='/services/mechanical-work'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Слесарные работы
-								</Link>
-							</li>
-							<li>
-								<Link
-									to='/services/diagnostics'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Диагностика
-								</Link>
-							</li>
-							<li>
-								<Link
-									to='/services/electrical'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Электрика
-								</Link>
-							</li>
-							<li>
-								<Link
-									to='/services/painting'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Покраска
-								</Link>
-							</li>
-							<li>
-								<Link
-									to='/services/welding'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Сварочные работы
-								</Link>
-							</li>
-							<li>
-								<Link
-									to='/services/detailing'
-									className='text-gray-400 hover:text-red-500 transition-colors'
-								>
-									Детейлинг
-								</Link>
-							</li>
-						</ul>
+						{isLoadingServices ? (
+							<div className='space-y-2'>
+								{[...Array(6)].map((_, i) => (
+									<div
+										key={i}
+										className='h-5 bg-gray-700 rounded w-3/4 animate-pulse'
+									/>
+								))}
+							</div>
+						) : (
+							<ul className='space-y-2'>
+								{footerServices.map((service) => (
+									<li key={service.id}>
+										<Link
+											to={`/services/${service.id}`}
+											className='text-gray-400 hover:text-red-500 transition-colors'
+										>
+											{service.title}
+										</Link>
+									</li>
+								))}
+							</ul>
+						)}
 					</div>
 
 					<div>
 						<h3 className='text-xl font-semibold mb-4 text-white'>
 							Контакты
 						</h3>
-						{isLoadingGeneral && !generalData ? (
+						{isLoadingSettings && !settings ? (
 							<div className='space-y-4 min-h-[100px] flex items-center'>
 								<Loader size='sm' text='Загрузка контактов...' />
 							</div>
@@ -112,15 +87,17 @@ const Footer = () => {
 								<div className='flex items-center'>
 									<PhoneCall size={20} className='text-red-500 mr-3' />
 									<a
-										href={`tel:${telLinkPhone}`}
+										href={phoneLink}
 										className='text-gray-400 hover:text-red-500 transition-colors'
 									>
-										{displayPhoneFormatted}
+										{displayPhone}
 									</a>
 								</div>
 								<div className='flex items-center'>
 									<Clock size={20} className='text-red-500 mr-3' />
-									<span className='text-gray-400'>10:00-22:00</span>
+									<span className='text-gray-400'>
+										{displayWorkingHours}
+									</span>
 								</div>
 								<div className='flex items-start'>
 									<MapPin size={20} className='text-red-500 mr-3 mt-1' />

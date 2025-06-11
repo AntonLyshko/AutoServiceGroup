@@ -1,22 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchWorkExamplesForPreview } from '../services/apiService';
-import { TransformedWorkExamplePreviewItem } from '../types/api';
+import { fetchWorkExamples } from '../services/apiService';
+import { TransformedWorkExamplePreview } from '../types/api';
 import ImageCompare from './ImageCompare';
-import Loader from './Loader'; // Импорт Loader
+import Loader from './Loader';
 
 const GalleryPreview = () => {
 	const {
-		data: workExamplesPreviewData,
+		data: workExamples,
 		isLoading,
 		error,
-	} = useQuery<TransformedWorkExamplePreviewItem[]>({
-		queryKey: ['workExamplesPreview'],
-		queryFn: fetchWorkExamplesForPreview,
+	} = useQuery<TransformedWorkExamplePreview[]>({
+		queryKey: ['workExamples'],
+		queryFn: fetchWorkExamples,
 	});
 
-	if (isLoading && !workExamplesPreviewData) {
+	if (isLoading && !workExamples) {
 		return (
 			<section className='py-20 bg-gray-950'>
 				<div className='container mx-auto px-4 flex justify-center items-center h-96'>
@@ -26,8 +26,7 @@ const GalleryPreview = () => {
 		);
 	}
 
-	if (error || !workExamplesPreviewData) {
-		// Показываем ошибку, если есть ошибка (даже если есть старые данные, но новая загрузка не удалась)
+	if (error) {
 		return (
 			<section className='py-20 bg-gray-950'>
 				<div className='container mx-auto px-4 text-center text-red-500'>
@@ -37,11 +36,7 @@ const GalleryPreview = () => {
 		);
 	}
 
-	// Если workExamplesPreviewData есть (может быть из кеша), но isLoading все еще true (refetching),
-	// мы все равно отображаем данные, чтобы избежать "прыжков" UI.
-	// Лоадер был показан выше только если isLoading И !workExamplesPreviewData.
-
-	const previewItems = workExamplesPreviewData.slice(0, 6);
+	const previewItems = workExamples?.slice(0, 6) || [];
 
 	return (
 		<section className='py-20 bg-gray-950'>
@@ -56,32 +51,28 @@ const GalleryPreview = () => {
 					</p>
 				</div>
 
-				{previewItems.length === 0 &&
-					!isLoading && ( // isLoading здесь для случая, если данные загрузились, но массив пуст
-						<p className='text-center text-gray-400'>
-							Примеров работ пока нет.
-						</p>
-					)}
+				{previewItems.length === 0 && !isLoading && (
+					<p className='text-center text-gray-400'>
+						Примеров работ пока нет.
+					</p>
+				)}
 
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 mb-12'>
 					{previewItems.map((item) => (
-						<div
-							key={item.workExampleId + (item.id || '')}
-							className='group'
-						>
-							<Link to={`/work-examples/${item.workExampleId}`}>
+						<div key={item.id} className='group'>
+							<Link to={`/work-examples/${item.id}`}>
 								<div className='relative overflow-hidden rounded-lg h-[350px] md:h-[400px] mb-3 bg-gray-800'>
-									{item.type === 'single' ? (
+									{item.previewImage.type === 'single' ? (
 										<img
-											src={item.imageUrl}
+											src={item.previewImage.imageUrl}
 											alt={item.title}
 											className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
 											loading='lazy'
 										/>
 									) : (
 										<ImageCompare
-											beforeImage={item.beforeImage}
-											afterImage={item.afterImage}
+											beforeImage={item.previewImage.beforeImage}
+											afterImage={item.previewImage.afterImage}
 											altBefore={`До - ${item.title}`}
 											altAfter={`После - ${item.title}`}
 										/>
@@ -91,12 +82,12 @@ const GalleryPreview = () => {
 							<div>
 								<h4 className='text-lg font-semibold text-white mb-1'>
 									<Link
-										to={`/work-examples/${item.workExampleId}`}
+										to={`/work-examples/${item.id}`}
 										className='hover:text-red-500'
 									>
-										{item.originalTitle}
+										{item.title}
 									</Link>
-									{item.type === 'beforeAfter' && (
+									{item.previewImage.type === 'beforeAfter' && (
 										<span className='text-sm text-gray-400 ml-2'>
 											(До/После)
 										</span>

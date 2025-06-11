@@ -1,25 +1,19 @@
 import React from 'react';
 import { ChevronDown, MessageCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchHeroData, fetchGeneralData } from '../services/apiService';
-import { TransformedHeroData, TransformedGeneralData } from '../types/api';
-import Loader from './Loader'; // Импорт Loader
+import { fetchSettings } from '../services/apiService';
+import { SiteSettings } from '../types/api';
+import Loader from './Loader';
 
 const Hero = () => {
 	const {
-		data: heroData,
-		isLoading: isLoadingHero,
-		error: errorHero,
-	} = useQuery<TransformedHeroData | null>({
-		queryKey: ['heroData'],
-		queryFn: fetchHeroData,
+		data: settings,
+		isLoading: isLoadingSettings,
+		error: errorSettings,
+	} = useQuery<SiteSettings | null>({
+		queryKey: ['siteSettings'],
+		queryFn: fetchSettings,
 	});
-
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
-		});
 
 	const scrollToContent = () => {
 		window.scrollTo({
@@ -28,36 +22,25 @@ const Hero = () => {
 		});
 	};
 
-	// Если основные данные для Hero еще не загружены (и нет данных в кеше)
-	if (isLoadingHero && !heroData) {
+	// Если основные данные еще не загружены (и нет данных в кеше)
+	if (isLoadingSettings && !settings) {
 		return (
-			<div
-				className='relative h-screen w-full bg-gray-900 flex items-center justify-center'
-				// Можно оставить дефолтный фон для плавности, если есть изображение по умолчанию в CSS или здесь
-				// style={{ backgroundImage: `url(/img/img_1.webp)` }}
-			>
+			<div className='relative h-screen w-full bg-gray-900 flex items-center justify-center'>
 				<Loader size='xl' text='Загрузка...' textColor='text-white' />
 			</div>
 		);
 	}
 
-	// Значения по умолчанию используются, если heroData еще не пришло, или пришло null (обработано в apiService)
-	const title = heroData?.title || 'Автосервис';
-	const secondTitle = heroData?.secondTitle || 'ТрейдАвто-групп';
-	const description =
-		heroData?.description ||
-		'Профессиональный ремонт и обслуживание автомобилей любых марок с использованием современного оборудования и оригинальных запчастей';
-	const heroBackgroundImageUrl =
-		heroData?.backgroundImageUrl || '/img/img_1.webp';
-
-	if (errorHero && !heroData) {
-		// Если ошибка и данных по-прежнему нет
-		console.error('Ошибка загрузки данных для Hero:', errorHero);
-		// Используем значения по умолчанию, установленные выше
+	if (errorSettings) {
+		console.error('Ошибка загрузки настроек для Hero:', errorSettings);
 	}
 
-	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
-	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+	const title = settings?.mainTitle || 'Автосервис';
+	const secondTitle = settings?.mainSubtitle || 'ТрейдАвто-групп';
+	const description =
+		'Профессиональный ремонт и обслуживание автомобилей любых марок с использованием современного оборудования и оригинальных запчастей';
+	const heroBackgroundImageUrl = '/img/img_1.webp'; // Используем статическое изображение
+	const whatsAppLink = settings?.whatsappLink || '#';
 
 	return (
 		<div
@@ -82,7 +65,7 @@ const Hero = () => {
 					{description}
 				</p>
 				<div className='flex flex-col sm:flex-row justify-center gap-4'>
-					{isLoadingGeneral && !generalData ? (
+					{isLoadingSettings && !settings ? (
 						<div className='py-3 px-8 bg-green-600 text-white font-semibold rounded-md flex items-center justify-center opacity-80 min-w-[230px] h-[48px]'>
 							<Loader
 								size='xs'

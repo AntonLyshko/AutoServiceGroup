@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, PhoneCall, Clock, MapPin, Car } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchServices, fetchGeneralData } from '../services/apiService';
-import { TransformedService, TransformedGeneralData } from '../types/api';
-import {
-	formatDisplayPhoneNumber,
-	formatPhoneNumberForTelLink,
-} from '../lib/utils';
-import Loader from './Loader'; // Импорт Loader
+import { fetchServices, fetchSettings } from '../services/apiService';
+import { TransformedService, SiteSettings } from '../types/api';
+import Loader from './Loader';
 
 const Navbar = () => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -22,10 +18,10 @@ const Navbar = () => {
 		queryFn: fetchServices,
 	});
 
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
+	const { data: settings, isLoading: isLoadingSettings } =
+		useQuery<SiteSettings | null>({
+			queryKey: ['siteSettings'],
+			queryFn: fetchSettings,
 		});
 
 	useEffect(() => {
@@ -58,16 +54,11 @@ const Navbar = () => {
 		}
 	};
 
-	const navServices =
-		servicesData?.filter((service) => service.id !== 'why-choose-us') ||
-		[];
-
-	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const displayPhoneFormatted = formatDisplayPhoneNumber(rawPhone);
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
-
-	const displayAddress =
-		generalData?.address || 'Березовский, Транспортников 42А';
+	const navServices = servicesData || [];
+	const phoneLink = settings?.phoneLink || '#';
+	const displayPhone = settings?.phoneNumber || 'Загрузка...';
+	const displayAddress = settings?.address || 'Загрузка...';
+	const displayWorkingHours = settings?.workingHours || '10:00-22:00';
 
 	return (
 		<header
@@ -89,28 +80,24 @@ const Navbar = () => {
 					<div className='flex items-center space-x-4'>
 						<div className='hidden md:flex items-center space-x-6 text-gray-300'>
 							<div className='flex items-center h-5'>
-								{' '}
-								{/* Задать высоту для выравнивания */}
 								<PhoneCall size={18} className='mr-2 text-red-500' />
-								{isLoadingGeneral && !generalData ? (
+								{isLoadingSettings && !settings ? (
 									<Loader
 										size='xs'
 										spinnerClassName='border-gray-300 border-t-transparent'
 									/>
 								) : (
 									<a
-										href={`tel:${telLinkPhone}`}
+										href={phoneLink}
 										className='hover:text-red-500 transition-colors text-sm lg:text-base'
 									>
-										{displayPhoneFormatted}
+										{displayPhone}
 									</a>
 								)}
 							</div>
 							<div className='flex items-center h-5'>
-								{' '}
-								{/* Задать высоту для выравнивания */}
 								<MapPin size={18} className='mr-2 text-red-500' />
-								{isLoadingGeneral && !generalData ? (
+								{isLoadingSettings && !settings ? (
 									<Loader
 										size='xs'
 										spinnerClassName='border-gray-300 border-t-transparent'
@@ -139,8 +126,6 @@ const Navbar = () => {
 				/>
 
 				<nav className='hidden md:flex items-center justify-start flex-wrap py-2 gap-x-3 lg:gap-x-4 min-h-[36px]'>
-					{' '}
-					{/* min-h для стабильности */}
 					{isLoadingServices && !navServices.length ? (
 						<div className='flex items-center h-[36px] py-2'>
 							<Loader
@@ -184,10 +169,6 @@ const Navbar = () => {
 						Контакты
 					</Link>
 				</nav>
-				{!isLoadingServices &&
-					navServices.length === 0 && ( // Если загрузка завершена и услуг нет
-						<div className='hidden md:block h-[36px] py-2'></div>
-					)}
 			</div>
 
 			<div
@@ -207,8 +188,6 @@ const Navbar = () => {
 						Услуги
 					</h3>
 					<div className='flex flex-col space-y-3 pl-2 min-h-[60px]'>
-						{' '}
-						{/* min-h */}
 						{isLoadingServices && !navServices.length ? (
 							<Loader
 								size='sm'
@@ -221,7 +200,6 @@ const Navbar = () => {
 									key={service.id}
 									to={`/services/${service.id}`}
 									className='block text-gray-300 hover:text-red-500 transition-colors text-lg'
-									onClick={closeMenu}
 								>
 									{service.title}
 								</Link>
@@ -231,7 +209,6 @@ const Navbar = () => {
 					<Link
 						to='/gallery'
 						className='text-xl text-white hover:text-red-500 transition-colors pt-2 border-t border-gray-700 mt-4'
-						onClick={closeMenu}
 					>
 						Наши работы
 					</Link>
@@ -251,9 +228,7 @@ const Navbar = () => {
 						Контакты
 					</Link>
 					<div className='mt-auto pt-6 border-t border-gray-700 space-y-4 min-h-[120px]'>
-						{' '}
-						{/* min-h */}
-						{isLoadingGeneral && !generalData ? (
+						{isLoadingSettings && !settings ? (
 							<div className='flex justify-center pt-4'>
 								<Loader
 									size='sm'
@@ -265,13 +240,13 @@ const Navbar = () => {
 							<>
 								<div className='flex items-center text-white'>
 									<PhoneCall size={20} className='mr-3 text-red-500' />
-									<a href={`tel:${telLinkPhone}`} className='text-lg'>
-										{displayPhoneFormatted}
+									<a href={phoneLink} className='text-lg'>
+										{displayPhone}
 									</a>
 								</div>
 								<div className='flex items-center text-white'>
 									<Clock size={20} className='mr-3 text-red-500' />
-									<span className='text-lg'>10:00-22:00</span>
+									<span className='text-lg'>{displayWorkingHours}</span>
 								</div>
 								<div className='flex items-start text-white'>
 									<MapPin size={20} className='mr-3 text-red-500 mt-1' />

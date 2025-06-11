@@ -1,44 +1,85 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
 	ArrowLeft,
 	PhoneCall,
 	MessageCircle,
 	ChevronLeft,
 	ChevronRight,
+	Edit,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCarById, fetchGeneralData } from '../services/apiService';
-import {
-	TransformedCarPageData,
-	TransformedGeneralData,
-} from '../types/api';
-import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import { fetchCarById, fetchSettings } from '../services/apiService';
+import { RestApiCar, SiteSettings, GalleryItem } from '../types/api';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import Contact from '../components/Contact';
-import { formatPhoneNumberForTelLink } from '../lib/utils';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
+
+// Вспомогательная функция для трансформации данных, перенесена сюда из apiService
+const transformCarData = (
+	car: RestApiCar
+): {
+	title: string;
+	cost: string;
+	description: string;
+	images: GalleryItem[];
+} => {
+	const transformImage = (image: any): GalleryItem => {
+		const baseItem = {
+			id: image.id,
+			title: image.description || 'Изображение',
+			description: image.description || '',
+		};
+		if (image.type === 'BEFORE_AFTER') {
+			return {
+				...baseItem,
+				type: 'beforeAfter',
+				beforeImage: image.urlBefore,
+				afterImage: image.urlAfter,
+			};
+		}
+		return {
+			...baseItem,
+			type: 'single',
+			imageUrl: image.urlSingle,
+		};
+	};
+
+	return {
+		title: car.name,
+		cost: new Intl.NumberFormat('ru-RU', {
+			style: 'currency',
+			currency: 'RUB',
+			minimumFractionDigits: 0,
+		}).format(car.price),
+		description: car.description,
+		images: car.images.map(transformImage),
+	};
+};
 
 const CarPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { carId } = useParams<{ carId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
-		data: car,
+		data: rawCar,
 		isLoading: isLoadingCar,
 		error: errorCar,
-	} = useQuery<TransformedCarPageData | null>({
-		queryKey: ['carPageData', carId],
+	} = useQuery<RestApiCar | null>({
+		queryKey: ['carData', carId],
 		queryFn: () => {
-			if (!carId) return Promise.resolve(null); // Если нет carId, не делаем запрос
+			if (!carId) return Promise.resolve(null);
 			return fetchCarById(carId);
 		},
-		enabled: !!carId, // Запрос выполняется только если carId существует
+		enabled: !!carId,
 	});
 
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
+	const { data: settings, isLoading: isLoadingSettings } =
+		useQuery<SiteSettings | null>({
+			queryKey: ['siteSettings'],
+			queryFn: fetchSettings,
 		});
 
 	const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -47,8 +88,7 @@ const CarPage: React.FC = () => {
 		setCurrentImageIndex(0);
 	}, [carId]);
 
-	// 1. Состояние начальной загрузки (когда `car` еще `undefined` или `null` и `isLoadingCar` true)
-	if (isLoadingCar && !car) {
+	if (isLoadingCar && !rawCar) {
 		return (
 			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
 				<Loader size='xl' text='Загрузка информации об автомобиле...' />
@@ -56,17 +96,16 @@ const CarPage: React.FC = () => {
 		);
 	}
 
-	// 2. Состояние ошибки (когда `errorCar` есть)
-	if (errorCar) {
-		console.error('Ошибка загрузки автомобиля:', errorCar);
+	if (errorCar || (!isLoadingCar && !rawCar)) {
 		return (
 			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
 				<h2 className='text-3xl font-bold text-white mb-4'>
-					Ошибка загрузки
+					{errorCar ? 'Ошибка загрузки' : 'Автомобиль не найден'}
 				</h2>
 				<p className='text-gray-300 mb-6'>
-					Не удалось загрузить данные об автомобиле. Пожалуйста, попробуйте
-					позже.
+					{errorCar
+						? 'Не удалось загрузить данные. Пожалуйста, попробуйте позже.'
+						: 'Запрошенный автомобиль не существует или был удален.'}
 				</p>
 				<button
 					onClick={() => navigate('/')}
@@ -78,47 +117,16 @@ const CarPage: React.FC = () => {
 		);
 	}
 
-	// 3. Состояние, когда загрузка завершена, ошибки нет, но `car` все равно `null` или `undefined`
-	// Это означает, что автомобиль не найден или carId был некорректен.
-	if (!isLoadingCar && !car) {
-		return (
-			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					Автомобиль не найден
-				</h2>
-				<p className='text-gray-300 mb-6'>
-					Запрошенный автомобиль не существует или был удален.
-				</p>
-				<button
-					onClick={() => navigate('/')}
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
-				>
-					Вернуться на главную
-				</button>
-			</div>
-		);
+	if (!rawCar) {
+		return null;
 	}
 
-	// Если мы дошли до сюда, а car всё еще null (этот блок для TypeScript, логически не должен достигаться при правильной обработке выше)
-	if (!car) {
-		// Можно вернуть null или более общее сообщение об ошибке/ненайденном ресурсе
-		// Этот return защищает от ошибок TypeScript ниже
-		return (
-			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					Данные об автомобиле отсутствуют
-				</h2>
-				<button
-					onClick={() => navigate('/')}
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
-				>
-					Вернуться на главную
-				</button>
-			</div>
-		);
-	}
+	const car = transformCarData(rawCar);
 
-	const mainImage = car.images[currentImageIndex]?.url;
+	const mainImage =
+		car.images[currentImageIndex]?.type === 'single'
+			? (car.images[currentImageIndex] as any).imageUrl
+			: '';
 	const totalImages = car.images?.length || 0;
 
 	const goToNextImage = useCallback(() => {
@@ -137,41 +145,42 @@ const CarPage: React.FC = () => {
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (totalImages <= 1) return; // car здесь точно существует
-
-			if (event.key === 'ArrowRight') {
-				goToNextImage();
-			} else if (event.key === 'ArrowLeft') {
-				goToPrevImage();
-			}
+			if (totalImages <= 1) return;
+			if (event.key === 'ArrowRight') goToNextImage();
+			else if (event.key === 'ArrowLeft') goToPrevImage();
 		};
-
 		window.addEventListener('keydown', handleKeyDown);
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [car, totalImages, goToNextImage, goToPrevImage]);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [totalImages, goToNextImage, goToPrevImage]);
 
 	const handleThumbnailClick = (index: number) => {
 		setCurrentImageIndex(index);
 	};
 
-	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
-
-	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
-	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+	const phoneLink = settings?.phoneLink || '#';
+	const whatsappLink = settings?.whatsappLink || '#';
 
 	return (
 		<div className='pt-16 md:pt-24 bg-gray-900 text-white'>
 			<div className='container mx-auto px-4 py-12 md:py-16'>
-				<button
-					onClick={() => navigate(-1)}
-					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-				>
-					<ArrowLeft size={20} className='mr-2' />
-					Назад
-				</button>
+				<div className='flex justify-between items-center mb-8'>
+					<button
+						onClick={() => navigate(-1)}
+						className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+					>
+						<ArrowLeft size={20} className='mr-2' />
+						Назад
+					</button>
+					{isLoggedIn && (
+						<Link
+							to={`/admin/cars/${carId}/edit`}
+							className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+						>
+							<Edit size={16} className='mr-2' />
+							Редактировать
+						</Link>
+					)}
+				</div>
 
 				<div className='grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12'>
 					<div className='lg:col-span-3'>
@@ -215,25 +224,27 @@ const CarPage: React.FC = () => {
 						</div>
 						{totalImages > 1 && (
 							<div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3'>
-								{car.images.map((image, index) => (
-									<button
-										key={image.url + index}
-										onClick={() => handleThumbnailClick(index)}
-										className={`aspect-w-1 aspect-h-1 bg-gray-800 rounded overflow-hidden cursor-pointer transition-opacity hover:opacity-80
-                                        ${
-																					index === currentImageIndex
-																						? 'ring-2 ring-red-500 opacity-100'
-																						: 'opacity-60'
-																				}`}
-										aria-label={`Показать изображение ${index + 1}`}
-									>
-										<img
-											src={image.url}
-											alt={`${car.title} - миниатюра ${index + 1}`}
-											className='w-full h-full object-cover'
-										/>
-									</button>
-								))}
+								{car.images.map((image, index) =>
+									image.type === 'single' ? (
+										<button
+											key={image.id}
+											onClick={() => handleThumbnailClick(index)}
+											className={`aspect-w-1 aspect-h-1 bg-gray-800 rounded overflow-hidden cursor-pointer transition-opacity hover:opacity-80
+                      ${
+												index === currentImageIndex
+													? 'ring-2 ring-red-500 opacity-100'
+													: 'opacity-60'
+											}`}
+											aria-label={`Показать изображение ${index + 1}`}
+										>
+											<img
+												src={(image as any).imageUrl}
+												alt={`${car.title} - миниатюра ${index + 1}`}
+												className='w-full h-full object-cover'
+											/>
+										</button>
+									) : null
+								)}
 							</div>
 						)}
 					</div>
@@ -246,7 +257,7 @@ const CarPage: React.FC = () => {
 							{car.cost}
 						</p>
 
-						{isLoadingGeneral && !generalData ? (
+						{isLoadingSettings && !settings ? (
 							<div className='space-y-4 mb-8'>
 								<div className='w-full flex items-center justify-center bg-red-600 text-white font-semibold py-3 px-6 rounded-md opacity-70 h-[48px]'>
 									<Loader
@@ -264,14 +275,14 @@ const CarPage: React.FC = () => {
 						) : (
 							<div className='space-y-4 mb-8'>
 								<a
-									href={`tel:${telLinkPhone}`}
+									href={phoneLink}
 									className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 h-[48px]'
 								>
 									<PhoneCall size={20} className='mr-2' />
 									Позвонить
 								</a>
 								<a
-									href={whatsAppLink}
+									href={whatsappLink}
 									target='_blank'
 									rel='noopener noreferrer'
 									className='w-full flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 h-[48px]'
@@ -282,17 +293,19 @@ const CarPage: React.FC = () => {
 							</div>
 						)}
 
-						<div className='prose prose-invert max-w-none text-gray-300 text-lg'>
-							<h2 className='text-2xl font-semibold text-white mb-3'>
-								Описание
-							</h2>
-							{car.descriptionObject &&
-							car.descriptionObject.length > 0 ? (
-								<StrapiRichTextRenderer content={car.descriptionObject} />
-							) : (
-								<p>Подробное описание отсутствует.</p>
-							)}
-						</div>
+						<h2 className='text-2xl font-semibold text-white mb-3'>
+							Описание
+						</h2>
+						{car.description ? (
+							<MarkdownRenderer
+								content={car.description}
+								className='text-lg'
+							/>
+						) : (
+							<p className='text-gray-300'>
+								Подробное описание отсутствует.
+							</p>
+						)}
 					</div>
 				</div>
 			</div>

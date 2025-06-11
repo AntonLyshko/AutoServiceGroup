@@ -1,38 +1,36 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, PhoneCall } from 'lucide-react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft, MessageCircle, PhoneCall, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import {
-	fetchServiceBySlug,
-	fetchGeneralData,
-} from '../services/apiService';
-import { TransformedService, TransformedGeneralData } from '../types/api';
+import { fetchServiceById, fetchSettings } from '../services/apiService';
+import { RestApiService, SiteSettings } from '../types/api';
 import Contact from '../components/Contact';
-import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
-import { formatPhoneNumberForTelLink } from '../lib/utils';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
 
 const ServicePage: React.FC = () => {
 	const navigate = useNavigate();
-	const { serviceSlug } = useParams<{ serviceSlug: string }>();
+	const { serviceId } = useParams<{ serviceId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
 		data: service,
 		isLoading: isLoadingService,
 		error: errorService,
-	} = useQuery<TransformedService | null>({
-		queryKey: ['service', serviceSlug],
+	} = useQuery<RestApiService | null>({
+		queryKey: ['service', serviceId],
 		queryFn: () => {
-			if (!serviceSlug) return Promise.resolve(null);
-			return fetchServiceBySlug(serviceSlug);
+			if (!serviceId) return Promise.resolve(null);
+			return fetchServiceById(serviceId);
 		},
-		enabled: !!serviceSlug,
+		enabled: !!serviceId,
 	});
 
-	const { data: generalData, isLoading: isLoadingGeneral } =
-		useQuery<TransformedGeneralData | null>({
-			queryKey: ['generalData'],
-			queryFn: fetchGeneralData,
+	const { data: settings, isLoading: isLoadingSettings } =
+		useQuery<SiteSettings | null>({
+			queryKey: ['siteSettings'],
+			queryFn: fetchSettings,
 		});
 
 	if (isLoadingService && !service) {
@@ -84,51 +82,49 @@ const ServicePage: React.FC = () => {
 	}
 
 	if (!service) {
-		// Этот return защищает от ошибок TypeScript ниже
-		return (
-			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					Данные об услуге отсутствуют
-				</h2>
-				<button
-					onClick={() => navigate('/')}
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md transition-colors'
-				>
-					Вернуться на главную
-				</button>
-			</div>
-		);
+		return null;
 	}
 
-	const rawPhone = generalData?.phone || '+7 965 511 8585';
-	const telLinkPhone = formatPhoneNumberForTelLink(rawPhone);
+	const phoneLink = settings?.phoneLink || '#';
+	const whatsappLink = settings?.whatsappLink || '#';
+	const displayAddress = settings?.address || 'Загрузка...';
+	const displayWorkingHours = settings?.workingHours || '10:00-22:00';
 
-	const displayAddress =
-		generalData?.address || 'Березовский, Транспортников 42А';
-	const whatsAppNumber = generalData?.whatsappPhone || '79655118585';
-	const whatsAppLink = `https://wa.me/${whatsAppNumber}`;
+	const backgroundImageUrl =
+		service.images?.[0]?.urlSingle || '/img/img_2.png';
 
 	return (
 		<div className='pt-16 md:pt-24 bg-gray-900'>
 			<div
-				className='relative h-[50vh] flex items-center bg-gray-700'
+				className='relative h-[50vh] flex items-end md:items-center bg-gray-700'
 				style={{
-					backgroundImage: `url(${service.imageUrl})`,
+					backgroundImage: `url(${backgroundImageUrl})`,
 					backgroundPosition: 'center',
 					backgroundSize: 'cover',
 				}}
 			>
 				<div className='absolute inset-0 bg-black opacity-70'></div>
-				<div className='container mx-auto px-4 relative z-10'>
-					<button
-						onClick={() => navigate(-1)}
-						className='mb-6 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-					>
-						<ArrowLeft size={20} className='mr-2' />
-						Назад
-					</button>
+				<div className='container mx-auto px-4 relative z-10 pb-8 md:pb-0'>
+					<div className='flex justify-between items-start mb-6'>
+						<button
+							onClick={() => navigate(-1)}
+							className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+						>
+							<ArrowLeft size={20} className='mr-2' />
+							Назад
+						</button>
+						{isLoggedIn && (
+							<Link
+								to={`/admin/services/${serviceId}/edit`}
+								className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+							>
+								<Edit size={16} className='mr-2' />
+								Редактировать
+							</Link>
+						)}
+					</div>
 					<h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-						{service.title}
+						{service.name}
 					</h1>
 				</div>
 			</div>
@@ -140,12 +136,8 @@ const ServicePage: React.FC = () => {
 							Об услуге
 						</h2>
 
-						<div className='prose prose-invert max-w-none text-gray-300 text-lg mb-8'>
-							{service.fullDescriptionObject && (
-								<StrapiRichTextRenderer
-									content={service.fullDescriptionObject}
-								/>
-							)}
+						<div className='text-lg mb-8'>
+							<MarkdownRenderer content={service.description} />
 						</div>
 					</div>
 
@@ -158,15 +150,15 @@ const ServicePage: React.FC = () => {
 								Для получения консультации или записи на сервис напишите
 								нам в WhatsApp или позвоните.
 							</p>
-							{isLoadingGeneral && !generalData ? (
+							{isLoadingSettings && !settings ? (
 								<div className='space-y-4'>
-									<div className='block w-full bg-green-600 text-white text-center font-semibold py-3 rounded-md opacity-70 h-[48px] flex items-center justify-center'>
+									<div className='w-full flex items-center justify-center bg-green-600 text-white font-semibold py-3 rounded-md opacity-70 h-[48px]'>
 										<Loader
 											size='xs'
 											spinnerClassName='border-white border-t-transparent'
 										/>
 									</div>
-									<div className='block w-full bg-red-600 text-white text-center font-semibold py-3 rounded-md opacity-70 h-[48px] flex items-center justify-center'>
+									<div className='w-full flex items-center justify-center bg-red-600 text-white font-semibold py-3 rounded-md opacity-70 h-[48px]'>
 										<Loader
 											size='xs'
 											spinnerClassName='border-white border-t-transparent'
@@ -176,7 +168,7 @@ const ServicePage: React.FC = () => {
 							) : (
 								<>
 									<a
-										href={whatsAppLink}
+										href={whatsappLink}
 										target='_blank'
 										rel='noopener noreferrer'
 										className='block w-full bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center h-[48px]'
@@ -185,7 +177,7 @@ const ServicePage: React.FC = () => {
 										Написать в WhatsApp
 									</a>
 									<a
-										href={`tel:${telLinkPhone}`}
+										href={phoneLink}
 										className='block w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-md mb-4 transition-colors flex items-center justify-center h-[48px]'
 									>
 										<PhoneCall className='mr-2' size={20} />
@@ -194,18 +186,8 @@ const ServicePage: React.FC = () => {
 								</>
 							)}
 							<div className='text-gray-400 text-sm mt-4'>
-								<p className='mb-2'>Часы работы: 10:00-22:00</p>
-								{isLoadingGeneral && !generalData ? (
-									<div className='flex items-center h-5'>
-										<Loader
-											size='xs'
-											spinnerClassName='border-gray-400 border-t-transparent'
-										/>
-										<span className='ml-2'>Загрузка адреса...</span>
-									</div>
-								) : (
-									<p>Адрес: {displayAddress}</p>
-								)}
+								<p className='mb-2'>Часы работы: {displayWorkingHours}</p>
+								<p>Адрес: {displayAddress}</p>
 							</div>
 						</div>
 					</div>

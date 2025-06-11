@@ -1,26 +1,67 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchWorkExampleById } from '../services/apiService';
 import {
-	TransformedWorkExamplePageData,
-	TransformedGalleryItem,
+	RestApiWorkExample,
+	GalleryItem,
+	RestApiImage,
 } from '../types/api';
 import ImageCompare from '../components/ImageCompare';
-import StrapiRichTextRenderer from '../components/StrapiRichTextRenderer';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
+
+// Вспомогательная функция для трансформации данных
+const transformWorkExampleData = (
+	we: RestApiWorkExample
+): {
+	id: string;
+	title: string;
+	description: string;
+	galleryItems: GalleryItem[];
+} => {
+	const transformImage = (image: RestApiImage): GalleryItem => {
+		const baseItem = {
+			id: image.id,
+			title: image.description || 'Изображение',
+			description: image.description || '',
+		};
+		if (image.type === 'BEFORE_AFTER') {
+			return {
+				...baseItem,
+				type: 'beforeAfter',
+				beforeImage: image.urlBefore!,
+				afterImage: image.urlAfter!,
+			};
+		}
+		return {
+			...baseItem,
+			type: 'single',
+			imageUrl: image.urlSingle!,
+		};
+	};
+
+	return {
+		id: we.id,
+		title: we.name,
+		description: we.description,
+		galleryItems: we.images.map(transformImage),
+	};
+};
 
 const WorkExamplePage = () => {
 	const navigate = useNavigate();
 	const { workExampleId } = useParams<{ workExampleId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
-		data: workExampleData,
+		data: rawWorkExample,
 		isLoading,
 		error,
-	} = useQuery<TransformedWorkExamplePageData | null>({
-		queryKey: ['workExamplePageData', workExampleId],
+	} = useQuery<RestApiWorkExample | null>({
+		queryKey: ['workExampleData', workExampleId],
 		queryFn: () => {
 			if (!workExampleId) return Promise.resolve(null);
 			return fetchWorkExampleById(workExampleId);
@@ -32,8 +73,11 @@ const WorkExamplePage = () => {
 		null
 	);
 
+	const workExampleData = rawWorkExample
+		? transformWorkExampleData(rawWorkExample)
+		: null;
+
 	const openModal = (index: number) => {
-		// Убедимся, что workExampleData существует перед доступом к galleryItems
 		if (
 			workExampleData &&
 			index >= 0 &&
@@ -52,21 +96,18 @@ const WorkExamplePage = () => {
 	const nextItem = useCallback(() => {
 		if (activeItemIndex === null || !workExampleData?.galleryItems.length)
 			return;
-		setActiveItemIndex((prevIndex) =>
-			prevIndex !== null
-				? (prevIndex + 1) % workExampleData.galleryItems.length // workExampleData здесь точно существует
-				: null
+		setActiveItemIndex(
+			(prev) => (prev! + 1) % workExampleData.galleryItems.length
 		);
 	}, [activeItemIndex, workExampleData]);
 
 	const prevItem = useCallback(() => {
 		if (activeItemIndex === null || !workExampleData?.galleryItems.length)
 			return;
-		setActiveItemIndex((prevIndex) =>
-			prevIndex !== null
-				? (prevIndex - 1 + workExampleData.galleryItems.length) % // workExampleData здесь точно существует
-				  workExampleData.galleryItems.length
-				: null
+		setActiveItemIndex(
+			(prev) =>
+				(prev! - 1 + workExampleData.galleryItems.length) %
+				workExampleData.galleryItems.length
 		);
 	}, [activeItemIndex, workExampleData]);
 
@@ -89,35 +130,16 @@ const WorkExamplePage = () => {
 		);
 	}
 
-	if (error) {
-		console.error('Ошибка загрузки проекта:', error);
+	if (error || (!isLoading && !workExampleData)) {
 		return (
 			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
 				<h2 className='text-3xl font-bold text-white mb-4'>
-					Ошибка загрузки проекта
+					{error ? 'Ошибка загрузки проекта' : 'Проект не найден'}
 				</h2>
 				<p className='text-gray-300 mb-6'>
-					Не удалось загрузить данные о проекте. Пожалуйста, попробуйте
-					позже.
-				</p>
-				<Link
-					to='/gallery'
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md'
-				>
-					Ко всем работам
-				</Link>
-			</div>
-		);
-	}
-
-	if (!isLoading && !workExampleData) {
-		return (
-			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					Проект не найден
-				</h2>
-				<p className='text-gray-300 mb-6'>
-					Запрошенный проект не существует или был удален.
+					{error
+						? 'Не удалось загрузить данные о проекте.'
+						: 'Запрошенный проект не существует или был удален.'}
 				</p>
 				<Link
 					to='/gallery'
@@ -130,61 +152,57 @@ const WorkExamplePage = () => {
 	}
 
 	if (!workExampleData) {
-		// Этот return защищает от ошибок TypeScript ниже
-		return (
-			<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen flex flex-col justify-center items-center text-center px-4'>
-				<h2 className='text-3xl font-bold text-white mb-4'>
-					Данные о проекте отсутствуют
-				</h2>
-				<Link
-					to='/gallery'
-					className='bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-md'
-				>
-					Ко всем работам
-				</Link>
-			</div>
-		);
+		return null;
 	}
 
-	const activeModalItem: TransformedGalleryItem | null =
-		activeItemIndex !== null &&
-		workExampleData.galleryItems[activeItemIndex] // workExampleData здесь точно существует
+	const activeModalItem: GalleryItem | null =
+		activeItemIndex !== null
 			? workExampleData.galleryItems[activeItemIndex]
 			: null;
+
+	const mainPreviewImage = workExampleData.galleryItems.find(
+		(i) => i.type === 'single'
+	) as GalleryItem | undefined;
 
 	return (
 		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
 			<div className='container mx-auto px-4 py-16'>
-				<button
-					onClick={() => navigate('/gallery')}
-					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-				>
-					<ArrowLeft size={20} className='mr-2' />
-					Назад к галерее работ
-				</button>
-
-				{workExampleData.mainPreviewImageUrl &&
-					workExampleData.mainPreviewImageUrl !== '/placeholder.png' && (
-						<div className='relative h-[40vh] md:h-[50vh] rounded-lg overflow-hidden mb-12 shadow-lg bg-gray-800'>
-							<img
-								src={workExampleData.mainPreviewImageUrl}
-								alt={`Главное изображение для ${workExampleData.title}`}
-								className='w-full h-full object-cover'
-							/>
-							<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
-						</div>
+				<div className='flex justify-between items-center mb-8'>
+					<button
+						onClick={() => navigate('/gallery')}
+						className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+					>
+						<ArrowLeft size={20} className='mr-2' />
+						Назад к галерее работ
+					</button>
+					{isLoggedIn && (
+						<Link
+							to={`/admin/work-examples/${workExampleId}/edit`}
+							className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+						>
+							<Edit size={16} className='mr-2' />
+							Редактировать
+						</Link>
 					)}
+				</div>
+
+				{mainPreviewImage && mainPreviewImage.type === 'single' && (
+					<div className='relative h-[40vh] md:h-[50vh] rounded-lg overflow-hidden mb-12 shadow-lg bg-gray-800'>
+						<img
+							src={(mainPreviewImage as any).imageUrl}
+							alt={`Главное изображение для ${workExampleData.title}`}
+							className='w-full h-full object-cover'
+						/>
+						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
+					</div>
+				)}
 
 				<h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
 					{workExampleData.title}
 				</h1>
 
-				<div className='prose prose-invert max-w-none text-gray-300 mb-12'>
-					{workExampleData.descriptionObject && (
-						<StrapiRichTextRenderer
-							content={workExampleData.descriptionObject}
-						/>
-					)}
+				<div className='mb-12'>
+					<MarkdownRenderer content={workExampleData.description} />
 				</div>
 
 				{workExampleData.galleryItems.length === 0 && (
@@ -203,7 +221,7 @@ const WorkExamplePage = () => {
 								{item.type === 'single' ? (
 									<>
 										<img
-											src={item.imageUrl}
+											src={(item as any).imageUrl}
 											alt={item.title}
 											className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
 											loading='lazy'
@@ -214,8 +232,8 @@ const WorkExamplePage = () => {
 												fill='none'
 												viewBox='0 0 24 24'
 												strokeWidth={1.5}
-												stroke='currentColor'
-												className='w-12 h-12 text-white'
+												stroke='white'
+												className='w-12 h-12'
 											>
 												<path
 													strokeLinecap='round'
@@ -227,8 +245,8 @@ const WorkExamplePage = () => {
 									</>
 								) : (
 									<ImageCompare
-										beforeImage={item.beforeImage}
-										afterImage={item.afterImage}
+										beforeImage={(item as any).beforeImage}
+										afterImage={(item as any).afterImage}
 										altBefore={`До - ${item.title}`}
 										altAfter={`После - ${item.title}`}
 									/>
@@ -258,7 +276,7 @@ const WorkExamplePage = () => {
 				</div>
 			</div>
 
-			{activeModalItem && ( // activeModalItem проверяется, workExampleData здесь уже точно существует
+			{activeModalItem && (
 				<div
 					className='fixed inset-0 bg-black/90 z-[100] flex flex-col p-4 md:p-8 items-center justify-center'
 					onClick={closeModal}
@@ -281,15 +299,15 @@ const WorkExamplePage = () => {
 						<div className='flex-grow flex items-center justify-center w-full max-w-5xl max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-150px)] mb-4'>
 							{activeModalItem.type === 'single' ? (
 								<img
-									src={activeModalItem.imageUrl}
+									src={(activeModalItem as any).imageUrl}
 									alt={activeModalItem.title}
 									className='block max-w-full max-h-full object-contain rounded-lg shadow-xl'
 								/>
 							) : (
 								<div className='w-full h-full bg-gray-800 rounded-lg overflow-hidden'>
 									<ImageCompare
-										beforeImage={activeModalItem.beforeImage}
-										afterImage={activeModalItem.afterImage}
+										beforeImage={(activeModalItem as any).beforeImage}
+										afterImage={(activeModalItem as any).afterImage}
 										altBefore={`До - ${activeModalItem.title}`}
 										altAfter={`После - ${activeModalItem.title}`}
 									/>
