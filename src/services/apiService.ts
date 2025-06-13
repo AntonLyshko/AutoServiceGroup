@@ -19,7 +19,7 @@ import {
 } from '../lib/utils';
 
 // Базовый URL вашего бэкенда
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = '';
 const API_PREFIX = '/api';
 
 // Вспомогательная функция для выполнения GET запросов
