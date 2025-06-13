@@ -7,7 +7,8 @@
 │   ├── components
 │   │   ├── admin
 │   │   │   ├── AdminHeader.tsx
-│   │   │   └── ImageManagerModal.tsx
+│   │   │   ├── ImageManagerModal.tsx
+│   │   │   └── ImagePreviewGrid.tsx
 │   │   ├── CarCard.tsx
 │   │   ├── CarsForSaleSection.tsx
 │   │   ├── Contact.tsx
@@ -29,11 +30,17 @@
 │   │   ├── admin
 │   │   │   ├── AdminLayout.tsx
 │   │   │   ├── CarCreatePage.tsx
+│   │   │   ├── CarEditPage.tsx
+│   │   │   ├── CarListPage.tsx
 │   │   │   ├── LoginPage.tsx
 │   │   │   ├── ProtectedRoute.tsx
 │   │   │   ├── ServiceCreatePage.tsx
+│   │   │   ├── ServiceEditPage.tsx
+│   │   │   ├── ServiceListPage.tsx
 │   │   │   ├── SettingsEditPage.tsx
-│   │   │   └── WorkExampleCreatePage.tsx
+│   │   │   ├── WorkExampleCreatePage.tsx
+│   │   │   ├── WorkExampleEditPage.tsx
+│   │   │   └── WorkExampleListPage.tsx
 │   │   ├── CarPage.tsx
 │   │   ├── Gallery.tsx
 │   │   ├── Home.tsx
@@ -1491,7 +1498,7 @@ export default ServicesSection;
 
 ```tsx
 import React from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom'; // Добавляем useNavigate
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
 import {
 	Settings,
@@ -1504,16 +1511,25 @@ import {
 
 const AdminHeader = () => {
 	const { logout } = useAuth();
-	const navigate = useNavigate(); // Инициализируем хук навигации
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	const handleLogout = () => {
-		logout(); // Вызываем logout из контекста
-		navigate('/'); // Выполняем переход на главную страницу
+		logout();
+		navigate('/');
 	};
 
-	const linkClass =
-		'flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors';
-	const activeLinkClass = 'bg-red-600 text-white';
+	const getLinkClass = (path: string) => {
+		const baseClass =
+			'flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors';
+		const activeClass = 'bg-red-600 text-white';
+
+		// Проверяем, начинается ли текущий путь с пути ссылки
+		if (location.pathname.startsWith(path)) {
+			return `${baseClass} ${activeClass}`;
+		}
+		return baseClass;
+	};
 
 	return (
 		<header className='bg-gray-800 text-white shadow-md sticky top-0 z-50'>
@@ -1529,53 +1545,46 @@ const AdminHeader = () => {
 						<NavLink
 							to='/admin/settings'
 							className={({ isActive }) =>
-								`${linkClass} ${isActive ? activeLinkClass : ''}`
+								`flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors ${
+									isActive ? 'bg-red-600 text-white' : ''
+								}`
 							}
 						>
 							<Settings size={18} className='mr-2' />
 							<span className='hidden md:inline'>Настройки</span>
 						</NavLink>
-						<NavLink
-							to='/admin/cars/new'
-							className={({ isActive }) =>
-								`${linkClass} ${isActive ? activeLinkClass : ''}`
-							}
-						>
+						{/* Ссылки теперь ведут на страницы списков */}
+						<Link to='/admin/cars' className={getLinkClass('/admin/cars')}>
 							<Car size={18} className='mr-2' />
 							<span className='hidden md:inline'>Авто</span>
-						</NavLink>
-						<NavLink
-							to='/admin/services/new'
-							className={({ isActive }) =>
-								`${linkClass} ${isActive ? activeLinkClass : ''}`
-							}
+						</Link>
+						<Link
+							to='/admin/services'
+							className={getLinkClass('/admin/services')}
 						>
 							<Wrench size={18} className='mr-2' />
 							<span className='hidden md:inline'>Услуги</span>
-						</NavLink>
-						<NavLink
-							to='/admin/work-examples/new'
-							className={({ isActive }) =>
-								`${linkClass} ${isActive ? activeLinkClass : ''}`
-							}
+						</Link>
+						<Link
+							to='/admin/work-examples'
+							className={getLinkClass('/admin/work-examples')}
 						>
 							<GalleryHorizontal size={18} className='mr-2' />
 							<span className='hidden md:inline'>Работы</span>
-						</NavLink>
+						</Link>
 						<div className='border-l border-gray-600 h-8 mx-2'></div>
 						<a
 							href='/'
 							target='_blank'
 							rel='noopener noreferrer'
-							className={linkClass}
+							className='flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors'
 							title='Открыть сайт'
 						>
 							<Home size={18} />
 						</a>
-						{/* Используем новый обработчик handleLogout */}
 						<button
 							onClick={handleLogout}
-							className={linkClass}
+							className='flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors'
 							title='Выйти'
 						>
 							<LogOut size={18} />
@@ -1596,13 +1605,17 @@ export default AdminHeader;
 ```tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Plus, Trash2, Image, Images } from 'lucide-react';
-import { ImageFilePayload } from '../../types/api';
+import {
+	ImageFilePayload,
+	ManagedImagePayload,
+	ExistingImagePayload,
+} from '../../types/api';
 
 interface ImageManagerModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSave: (images: ImageFilePayload[]) => void;
-	initialImages: ImageFilePayload[];
+	onSave: (images: ManagedImagePayload[]) => void;
+	initialImages: ManagedImagePayload[];
 }
 
 const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
@@ -1611,7 +1624,8 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 	onSave,
 	initialImages,
 }) => {
-	const [images, setImages] = useState<ImageFilePayload[]>(initialImages);
+	const [images, setImages] =
+		useState<ManagedImagePayload[]>(initialImages);
 	const [newImageType, setNewImageType] = useState<
 		'single' | 'beforeAfter'
 	>('single');
@@ -1622,15 +1636,23 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 	const beforeFileRef = useRef<HTMLInputElement>(null);
 	const afterFileRef = useRef<HTMLInputElement>(null);
 
+	// Обновляем состояние, если initialImages изменились
+	useEffect(() => {
+		setImages(initialImages);
+	}, [initialImages]);
+
 	// Очищаем превью URL при размонтировании
 	useEffect(() => {
 		return () => {
 			images.forEach((img) => {
-				if (img.type === 'SINGLE') {
-					URL.revokeObjectURL(img.previewUrl);
-				} else {
-					URL.revokeObjectURL(img.previewUrlBefore);
-					URL.revokeObjectURL(img.previewUrlAfter);
+				// Очищаем только для новых файлов, т.к. для существующих это полный URL
+				if (!('id' in img)) {
+					if (img.type === 'SINGLE') {
+						URL.revokeObjectURL(img.previewUrl);
+					} else {
+						URL.revokeObjectURL(img.previewUrlBefore);
+						URL.revokeObjectURL(img.previewUrlAfter);
+					}
 				}
 			});
 		};
@@ -1688,7 +1710,8 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 
 	const handleRemoveImage = (key: string) => {
 		const imageToRemove = images.find((img) => img.key === key);
-		if (imageToRemove) {
+		if (imageToRemove && !('id' in imageToRemove)) {
+			// Очищаем URL только для новых файлов
 			if (imageToRemove.type === 'SINGLE') {
 				URL.revokeObjectURL(imageToRemove.previewUrl);
 			} else {
@@ -1702,6 +1725,28 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 	const handleSave = () => {
 		onSave(images);
 		onClose();
+	};
+
+	const getPreviewUrls = (
+		img: ManagedImagePayload
+	): {
+		single?: string;
+		before?: string;
+		after?: string;
+	} => {
+		if ('id' in img) {
+			// ExistingImagePayload
+			return {
+				single: img.previewUrl,
+				before: img.previewUrlBefore,
+				after: img.previewUrlAfter,
+			};
+		}
+		// ImageFilePayload
+		if (img.type === 'SINGLE') {
+			return { single: img.previewUrl };
+		}
+		return { before: img.previewUrlBefore, after: img.previewUrlAfter };
 	};
 
 	return (
@@ -1726,6 +1771,7 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 				</div>
 
 				<div className='flex-grow p-4 overflow-y-auto'>
+					{/* Форма добавления осталась без изменений */}
 					<div className='bg-gray-700 p-4 rounded-lg mb-6'>
 						<h3 className='font-semibold text-lg mb-3'>
 							Добавить новое изображение
@@ -1837,52 +1883,67 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 								Изображения не добавлены.
 							</p>
 						) : (
-							images.map((img) => (
-								<div
-									key={img.key}
-									className='bg-gray-700 p-3 rounded-lg flex items-center justify-between gap-4'
-								>
-									<div className='flex-shrink-0'>
-										{img.type === 'SINGLE' ? (
-											<img
-												src={img.previewUrl}
-												alt={img.description}
-												className='w-16 h-16 object-cover rounded bg-gray-800'
-											/>
-										) : (
-											<div className='flex gap-1'>
-												<img
-													src={img.previewUrlBefore}
-													alt={`До - ${img.description}`}
-													className='w-12 h-12 object-cover rounded bg-gray-800'
-												/>
-												<img
-													src={img.previewUrlAfter}
-													alt={`После - ${img.description}`}
-													className='w-12 h-12 object-cover rounded bg-gray-800'
-												/>
-											</div>
-										)}
-									</div>
-									<div className='flex-grow min-w-0'>
-										<p
-											className='font-semibold truncate'
-											title={img.description}
-										>
-											{img.description}
-										</p>
-										<p className='text-xs text-gray-400'>
-											{img.type === 'SINGLE' ? 'Одиночное' : 'До/После'}
-										</p>
-									</div>
-									<button
-										onClick={() => handleRemoveImage(img.key)}
-										className='text-gray-400 hover:text-red-500 p-2'
+							images.map((img) => {
+								const previews = getPreviewUrls(img);
+								const isNew = !('id' in img);
+
+								return (
+									<div
+										key={img.key}
+										className={`p-3 rounded-lg flex items-center justify-between gap-4 ${
+											isNew ? 'bg-green-900/50' : 'bg-gray-700'
+										}`}
 									>
-										<Trash2 size={20} />
-									</button>
-								</div>
-							))
+										<div className='flex-shrink-0'>
+											{img.type === 'SINGLE' ? (
+												<img
+													src={previews.single}
+													alt={img.description}
+													className='w-16 h-16 object-cover rounded bg-gray-800'
+												/>
+											) : (
+												<div className='flex gap-1'>
+													<img
+														src={previews.before}
+														alt={`До - ${img.description}`}
+														className='w-12 h-12 object-cover rounded bg-gray-800'
+													/>
+													<img
+														src={previews.after}
+														alt={`После - ${img.description}`}
+														className='w-12 h-12 object-cover rounded bg-gray-800'
+													/>
+												</div>
+											)}
+										</div>
+										<div className='flex-grow min-w-0'>
+											<p
+												className='font-semibold truncate'
+												title={img.description}
+											>
+												{img.description}
+											</p>
+											<p className='text-xs text-gray-400'>
+												{img.type === 'SINGLE' ? 'Одиночное' : 'До/После'}{' '}
+												-{' '}
+												<span
+													className={
+														isNew ? 'text-green-400' : 'text-blue-400'
+													}
+												>
+													{isNew ? 'Новое' : 'Сохраненное'}
+												</span>
+											</p>
+										</div>
+										<button
+											onClick={() => handleRemoveImage(img.key)}
+											className='text-gray-400 hover:text-red-500 p-2'
+										>
+											<Trash2 size={20} />
+										</button>
+									</div>
+								);
+							})
 						)}
 					</div>
 				</div>
@@ -1907,6 +1968,146 @@ const ImageManagerModal: React.FC<ImageManagerModalProps> = ({
 };
 
 export default ImageManagerModal;
+
+```
+
+## src/components/admin/ImagePreviewGrid.tsx
+
+```tsx
+import React from 'react';
+import { ImagePlus, Trash2 } from 'lucide-react';
+import { ManagedImagePayload } from '../../types/api';
+
+interface ImagePreviewGridProps {
+	images: ManagedImagePayload[];
+	onManageClick: () => void;
+	onRemoveClick: (key: string) => void;
+}
+
+const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = ({
+	images,
+	onManageClick,
+	onRemoveClick,
+}) => {
+	const getPreviewUrls = (
+		img: ManagedImagePayload
+	): { single?: string; before?: string; after?: string } => {
+		if ('id' in img) {
+			// ExistingImagePayload
+			return {
+				single: img.previewUrl,
+				before: img.previewUrlBefore,
+				after: img.previewUrlAfter,
+			};
+		}
+		// ImageFilePayload
+		if (img.type === 'SINGLE') {
+			return { single: img.previewUrl };
+		}
+		return { before: img.previewUrlBefore, after: img.previewUrlAfter };
+	};
+
+	return (
+		<div>
+			<div className='flex justify-between items-center mb-2'>
+				<label className='block text-sm font-medium text-gray-300'>
+					Изображения ({images.length} шт.)
+				</label>
+				<button
+					type='button'
+					onClick={onManageClick}
+					className='flex items-center text-sm bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-md'
+				>
+					<ImagePlus size={16} className='mr-2' />
+					Добавить / Управлять
+				</button>
+			</div>
+
+			{images.length === 0 ? (
+				<div className='text-center py-6 bg-gray-900 border-2 border-dashed border-gray-600 rounded-lg'>
+					<p className='text-gray-400'>Нет изображений.</p>
+					<p className='text-xs text-gray-500'>
+						Нажмите "Добавить", чтобы загрузить.
+					</p>
+				</div>
+			) : (
+				<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 bg-gray-900 rounded-lg border border-gray-700'>
+					{images.map((img) => {
+						const previews = getPreviewUrls(img);
+						const isNew = !('id' in img);
+						const tagText = isNew ? 'Новое' : 'Сохраненное';
+						const tagClass = isNew ? 'bg-green-600/80' : 'bg-blue-600/80';
+
+						return (
+							<div
+								key={img.key}
+								className='relative aspect-square group bg-gray-800 rounded-md overflow-hidden'
+							>
+								{img.type === 'SINGLE' ? (
+									<img
+										src={previews.single}
+										alt={img.description}
+										className='w-full h-full object-cover'
+									/>
+								) : (
+									<div className='w-full h-full flex'>
+										<img
+											src={previews.before}
+											alt={`До: ${img.description}`}
+											className='w-1/2 h-full object-cover'
+										/>
+										<img
+											src={previews.after}
+											alt={`После: ${img.description}`}
+											className='w-1/2 h-full object-cover'
+										/>
+									</div>
+								)}
+
+								{/* Overlay с центрированным текстом */}
+								<div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col p-2'>
+									<div className='flex-grow flex items-center justify-center text-center'>
+										<p
+											className='text-xs text-white text-balance'
+											title={img.description}
+										>
+											{img.description || 'Без описания'}
+										</p>
+									</div>
+								</div>
+
+								{/* Кнопка удаления, всегда видима при наведении */}
+								<button
+									type='button'
+									onClick={() => onRemoveClick(img.key)}
+									className='absolute top-1.5 right-1.5 p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-10'
+									title='Удалить'
+								>
+									<Trash2 size={14} />
+								</button>
+
+								{/* Tag - теперь не виден при наведении */}
+								<div
+									className={`absolute top-1.5 left-1.5 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tagClass} group-hover:opacity-0 transition-opacity`}
+								>
+									{tagText}
+								</div>
+
+								{img.type === 'BEFORE_AFTER' && (
+									<div className='absolute bottom-1.5 left-1.5 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-700/80 group-hover:opacity-0 transition-opacity'>
+										До/После
+									</div>
+								)}
+							</div>
+						);
+					})}
+				</div>
+			)}
+		</div>
+	);
+};
+
+export default ImagePreviewGrid;
 
 ```
 
@@ -2037,9 +2238,18 @@ import ProtectedRoute from './pages/admin/ProtectedRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import LoginPage from './pages/admin/LoginPage';
 import SettingsEditPage from './pages/admin/SettingsEditPage';
+// List Pages
+import CarListPage from './pages/admin/CarListPage';
+import ServiceListPage from './pages/admin/ServiceListPage';
+import WorkExampleListPage from './pages/admin/WorkExampleListPage';
+// Create Pages
 import CarCreatePage from './pages/admin/CarCreatePage';
 import ServiceCreatePage from './pages/admin/ServiceCreatePage';
 import WorkExampleCreatePage from './pages/admin/WorkExampleCreatePage';
+// Edit Pages
+import CarEditPage from './pages/admin/CarEditPage';
+import ServiceEditPage from './pages/admin/ServiceEditPage';
+import WorkExampleEditPage from './pages/admin/WorkExampleEditPage';
 
 import './index.css';
 
@@ -2071,9 +2281,21 @@ const router = createBrowserRouter([
 		),
 		children: [
 			{ path: 'settings', element: <SettingsEditPage /> },
+			// Car routes
+			{ path: 'cars', element: <CarListPage /> },
 			{ path: 'cars/new', element: <CarCreatePage /> },
+			{ path: 'cars/:carId/edit', element: <CarEditPage /> },
+			// Service routes
+			{ path: 'services', element: <ServiceListPage /> },
 			{ path: 'services/new', element: <ServiceCreatePage /> },
+			{ path: 'services/:serviceId/edit', element: <ServiceEditPage /> },
+			// Work Example routes
+			{ path: 'work-examples', element: <WorkExampleListPage /> },
 			{ path: 'work-examples/new', element: <WorkExampleCreatePage /> },
+			{
+				path: 'work-examples/:workExampleId/edit',
+				element: <WorkExampleEditPage />,
+			},
 		],
 	},
 	{
@@ -2085,7 +2307,6 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
-			{/* Эта структура теперь корректна */}
 			<AuthProvider>
 				<RouterProvider router={router} />
 			</AuthProvider>
@@ -2099,31 +2320,76 @@ createRoot(document.getElementById('root')!).render(
 
 ```tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
 	ArrowLeft,
 	PhoneCall,
 	MessageCircle,
 	ChevronLeft,
 	ChevronRight,
+	Edit,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCarById, fetchSettings } from '../services/apiService';
-import { TransformedCarPageData, SiteSettings } from '../types/api';
+import { RestApiCar, SiteSettings, GalleryItem } from '../types/api';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import Contact from '../components/Contact';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
+
+// Вспомогательная функция для трансформации данных, перенесена сюда из apiService
+const transformCarData = (
+	car: RestApiCar
+): {
+	title: string;
+	cost: string;
+	description: string;
+	images: GalleryItem[];
+} => {
+	const transformImage = (image: any): GalleryItem => {
+		const baseItem = {
+			id: image.id,
+			title: image.description || 'Изображение',
+			description: image.description || '',
+		};
+		if (image.type === 'BEFORE_AFTER') {
+			return {
+				...baseItem,
+				type: 'beforeAfter',
+				beforeImage: image.urlBefore,
+				afterImage: image.urlAfter,
+			};
+		}
+		return {
+			...baseItem,
+			type: 'single',
+			imageUrl: image.urlSingle,
+		};
+	};
+
+	return {
+		title: car.name,
+		cost: new Intl.NumberFormat('ru-RU', {
+			style: 'currency',
+			currency: 'RUB',
+			minimumFractionDigits: 0,
+		}).format(car.price),
+		description: car.description,
+		images: car.images.map(transformImage),
+	};
+};
 
 const CarPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { carId } = useParams<{ carId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
-		data: car,
+		data: rawCar,
 		isLoading: isLoadingCar,
 		error: errorCar,
-	} = useQuery<TransformedCarPageData | null>({
-		queryKey: ['carPageData', carId],
+	} = useQuery<RestApiCar | null>({
+		queryKey: ['carData', carId],
 		queryFn: () => {
 			if (!carId) return Promise.resolve(null);
 			return fetchCarById(carId);
@@ -2143,7 +2409,7 @@ const CarPage: React.FC = () => {
 		setCurrentImageIndex(0);
 	}, [carId]);
 
-	if (isLoadingCar && !car) {
+	if (isLoadingCar && !rawCar) {
 		return (
 			<div className='min-h-screen bg-gray-900 text-white flex justify-center items-center pt-24 md:pt-32'>
 				<Loader size='xl' text='Загрузка информации об автомобиле...' />
@@ -2151,7 +2417,7 @@ const CarPage: React.FC = () => {
 		);
 	}
 
-	if (errorCar || (!isLoadingCar && !car)) {
+	if (errorCar || (!isLoadingCar && !rawCar)) {
 		return (
 			<div className='min-h-screen flex flex-col items-center justify-center bg-gray-900 pt-24 md:pt-32 text-center px-4'>
 				<h2 className='text-3xl font-bold text-white mb-4'>
@@ -2172,13 +2438,15 @@ const CarPage: React.FC = () => {
 		);
 	}
 
-	if (!car) {
-		return null; // Защита для TypeScript
+	if (!rawCar) {
+		return null;
 	}
+
+	const car = transformCarData(rawCar);
 
 	const mainImage =
 		car.images[currentImageIndex]?.type === 'single'
-			? car.images[currentImageIndex].imageUrl
+			? (car.images[currentImageIndex] as any).imageUrl
 			: '';
 	const totalImages = car.images?.length || 0;
 
@@ -2216,13 +2484,24 @@ const CarPage: React.FC = () => {
 	return (
 		<div className='pt-16 md:pt-24 bg-gray-900 text-white'>
 			<div className='container mx-auto px-4 py-12 md:py-16'>
-				<button
-					onClick={() => navigate(-1)}
-					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-				>
-					<ArrowLeft size={20} className='mr-2' />
-					Назад
-				</button>
+				<div className='flex justify-between items-center mb-8'>
+					<button
+						onClick={() => navigate(-1)}
+						className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+					>
+						<ArrowLeft size={20} className='mr-2' />
+						Назад
+					</button>
+					{isLoggedIn && (
+						<Link
+							to={`/admin/cars/${carId}/edit`}
+							className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+						>
+							<Edit size={16} className='mr-2' />
+							Редактировать
+						</Link>
+					)}
+				</div>
 
 				<div className='grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12'>
 					<div className='lg:col-span-3'>
@@ -2280,7 +2559,7 @@ const CarPage: React.FC = () => {
 											aria-label={`Показать изображение ${index + 1}`}
 										>
 											<img
-												src={image.imageUrl}
+												src={(image as any).imageUrl}
 												alt={`${car.title} - миниатюра ${index + 1}`}
 												className='w-full h-full object-cover'
 											/>
@@ -2589,18 +2868,20 @@ export default Home;
 
 ```tsx
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, PhoneCall } from 'lucide-react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft, MessageCircle, PhoneCall, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchServiceById, fetchSettings } from '../services/apiService';
 import { RestApiService, SiteSettings } from '../types/api';
 import Contact from '../components/Contact';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
 
 const ServicePage: React.FC = () => {
 	const navigate = useNavigate();
 	const { serviceId } = useParams<{ serviceId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
 		data: service,
@@ -2669,7 +2950,6 @@ const ServicePage: React.FC = () => {
 		);
 	}
 
-	// Защита от null для TypeScript
 	if (!service) {
 		return null;
 	}
@@ -2679,14 +2959,13 @@ const ServicePage: React.FC = () => {
 	const displayAddress = settings?.address || 'Загрузка...';
 	const displayWorkingHours = settings?.workingHours || '10:00-22:00';
 
-	// Используем первое изображение как фоновое
 	const backgroundImageUrl =
 		service.images?.[0]?.urlSingle || '/img/img_2.png';
 
 	return (
 		<div className='pt-16 md:pt-24 bg-gray-900'>
 			<div
-				className='relative h-[50vh] flex items-center bg-gray-700'
+				className='relative h-[50vh] flex items-end md:items-center bg-gray-700'
 				style={{
 					backgroundImage: `url(${backgroundImageUrl})`,
 					backgroundPosition: 'center',
@@ -2694,14 +2973,25 @@ const ServicePage: React.FC = () => {
 				}}
 			>
 				<div className='absolute inset-0 bg-black opacity-70'></div>
-				<div className='container mx-auto px-4 relative z-10'>
-					<button
-						onClick={() => navigate(-1)}
-						className='mb-6 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-					>
-						<ArrowLeft size={20} className='mr-2' />
-						Назад
-					</button>
+				<div className='container mx-auto px-4 relative z-10 pb-8 md:pb-0'>
+					<div className='flex justify-between items-start mb-6'>
+						<button
+							onClick={() => navigate(-1)}
+							className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+						>
+							<ArrowLeft size={20} className='mr-2' />
+							Назад
+						</button>
+						{isLoggedIn && (
+							<Link
+								to={`/admin/services/${serviceId}/edit`}
+								className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+							>
+								<Edit size={16} className='mr-2' />
+								Редактировать
+							</Link>
+						)}
+					</div>
 					<h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
 						{service.name}
 					</h1>
@@ -2786,24 +3076,68 @@ export default ServicePage;
 ```tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchWorkExampleById } from '../services/apiService';
-import { TransformedWorkExamplePageData, GalleryItem } from '../types/api';
+import {
+	RestApiWorkExample,
+	GalleryItem,
+	RestApiImage,
+} from '../types/api';
 import ImageCompare from '../components/ImageCompare';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import Loader from '../components/Loader';
+import { useAuth } from '../auth/useAuth';
+
+// Вспомогательная функция для трансформации данных
+const transformWorkExampleData = (
+	we: RestApiWorkExample
+): {
+	id: string;
+	title: string;
+	description: string;
+	galleryItems: GalleryItem[];
+} => {
+	const transformImage = (image: RestApiImage): GalleryItem => {
+		const baseItem = {
+			id: image.id,
+			title: image.description || 'Изображение',
+			description: image.description || '',
+		};
+		if (image.type === 'BEFORE_AFTER') {
+			return {
+				...baseItem,
+				type: 'beforeAfter',
+				beforeImage: image.urlBefore!,
+				afterImage: image.urlAfter!,
+			};
+		}
+		return {
+			...baseItem,
+			type: 'single',
+			imageUrl: image.urlSingle!,
+		};
+	};
+
+	return {
+		id: we.id,
+		title: we.name,
+		description: we.description,
+		galleryItems: we.images.map(transformImage),
+	};
+};
 
 const WorkExamplePage = () => {
 	const navigate = useNavigate();
 	const { workExampleId } = useParams<{ workExampleId: string }>();
+	const { isLoggedIn } = useAuth();
 
 	const {
-		data: workExampleData,
+		data: rawWorkExample,
 		isLoading,
 		error,
-	} = useQuery<TransformedWorkExamplePageData | null>({
-		queryKey: ['workExamplePageData', workExampleId],
+	} = useQuery<RestApiWorkExample | null>({
+		queryKey: ['workExampleData', workExampleId],
 		queryFn: () => {
 			if (!workExampleId) return Promise.resolve(null);
 			return fetchWorkExampleById(workExampleId);
@@ -2814,6 +3148,10 @@ const WorkExamplePage = () => {
 	const [activeItemIndex, setActiveItemIndex] = useState<number | null>(
 		null
 	);
+
+	const workExampleData = rawWorkExample
+		? transformWorkExampleData(rawWorkExample)
+		: null;
 
 	const openModal = (index: number) => {
 		if (
@@ -2905,18 +3243,29 @@ const WorkExamplePage = () => {
 	return (
 		<div className='pt-24 md:pt-32 bg-gray-900 min-h-screen'>
 			<div className='container mx-auto px-4 py-16'>
-				<button
-					onClick={() => navigate('/gallery')}
-					className='mb-8 flex items-center text-gray-300 hover:text-red-500 transition-colors'
-				>
-					<ArrowLeft size={20} className='mr-2' />
-					Назад к галерее работ
-				</button>
+				<div className='flex justify-between items-center mb-8'>
+					<button
+						onClick={() => navigate('/gallery')}
+						className='flex items-center text-gray-300 hover:text-red-500 transition-colors'
+					>
+						<ArrowLeft size={20} className='mr-2' />
+						Назад к галерее работ
+					</button>
+					{isLoggedIn && (
+						<Link
+							to={`/admin/work-examples/${workExampleId}/edit`}
+							className='flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+						>
+							<Edit size={16} className='mr-2' />
+							Редактировать
+						</Link>
+					)}
+				</div>
 
 				{mainPreviewImage && mainPreviewImage.type === 'single' && (
 					<div className='relative h-[40vh] md:h-[50vh] rounded-lg overflow-hidden mb-12 shadow-lg bg-gray-800'>
 						<img
-							src={mainPreviewImage.imageUrl}
+							src={(mainPreviewImage as any).imageUrl}
 							alt={`Главное изображение для ${workExampleData.title}`}
 							className='w-full h-full object-cover'
 						/>
@@ -2948,7 +3297,7 @@ const WorkExamplePage = () => {
 								{item.type === 'single' ? (
 									<>
 										<img
-											src={item.imageUrl}
+											src={(item as any).imageUrl}
 											alt={item.title}
 											className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
 											loading='lazy'
@@ -2972,8 +3321,8 @@ const WorkExamplePage = () => {
 									</>
 								) : (
 									<ImageCompare
-										beforeImage={item.beforeImage}
-										afterImage={item.afterImage}
+										beforeImage={(item as any).beforeImage}
+										afterImage={(item as any).afterImage}
 										altBefore={`До - ${item.title}`}
 										altAfter={`После - ${item.title}`}
 									/>
@@ -3026,15 +3375,15 @@ const WorkExamplePage = () => {
 						<div className='flex-grow flex items-center justify-center w-full max-w-5xl max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-150px)] mb-4'>
 							{activeModalItem.type === 'single' ? (
 								<img
-									src={activeModalItem.imageUrl}
+									src={(activeModalItem as any).imageUrl}
 									alt={activeModalItem.title}
 									className='block max-w-full max-h-full object-contain rounded-lg shadow-xl'
 								/>
 							) : (
 								<div className='w-full h-full bg-gray-800 rounded-lg overflow-hidden'>
 									<ImageCompare
-										beforeImage={activeModalItem.beforeImage}
-										afterImage={activeModalItem.afterImage}
+										beforeImage={(activeModalItem as any).beforeImage}
+										afterImage={(activeModalItem as any).afterImage}
 										altBefore={`До - ${activeModalItem.title}`}
 										altAfter={`После - ${activeModalItem.title}`}
 									/>
@@ -3119,10 +3468,15 @@ export default AdminLayout;
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createCar } from '../../services/apiService';
-import { ImageFilePayload, ImageMeta } from '../../types/api';
+import {
+	ImageFilePayload,
+	ImageMeta,
+	ManagedImagePayload,
+} from '../../types/api';
 import Loader from '../../components/Loader';
 import ImageManagerModal from '../../components/admin/ImageManagerModal';
-import { Save, ImagePlus } from 'lucide-react';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid'; // <-- Импортируем новый компонент
+import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CarCreatePage: React.FC = () => {
@@ -3177,13 +3531,27 @@ const CarCreatePage: React.FC = () => {
 		mutation.mutate(formData);
 	};
 
+	const handleImageSave = (managedImages: ManagedImagePayload[]) => {
+		const newImageFiles = managedImages.filter(
+			(img): img is ImageFilePayload => !('id' in img)
+		);
+		setImages(newImageFiles);
+	};
+
+	// Функция для удаления изображения из превью
+	const handleRemoveImage = (key: string) => {
+		setImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
 	return (
 		<>
 			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
 				<h1 className='text-2xl font-bold mb-6'>
 					Создать запись: Автомобиль на продажу
 				</h1>
-				<form onSubmit={handleSubmit} className='space-y-4'>
+				<form onSubmit={handleSubmit} className='space-y-6'>
 					<div>
 						<label
 							htmlFor='name'
@@ -3232,19 +3600,14 @@ const CarCreatePage: React.FC = () => {
 							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
 						/>
 					</div>
-					<div>
-						<label className='block text-sm font-medium text-gray-300 mb-2'>
-							Изображения ({images.length} шт.)
-						</label>
-						<button
-							type='button'
-							onClick={() => setIsModalOpen(true)}
-							className='w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md'
-						>
-							<ImagePlus size={20} className='mr-2' />
-							Управление изображениями
-						</button>
-					</div>
+
+					{/* Заменяем старый блок на новый компонент */}
+					<ImagePreviewGrid
+						images={images}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
 					<div className='pt-4'>
 						<button
 							type='submit'
@@ -3269,7 +3632,7 @@ const CarCreatePage: React.FC = () => {
 			<ImageManagerModal
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
-				onSave={setImages}
+				onSave={handleImageSave}
 				initialImages={images}
 			/>
 		</>
@@ -3277,6 +3640,373 @@ const CarCreatePage: React.FC = () => {
 };
 
 export default CarCreatePage;
+
+```
+
+## src/pages/admin/CarEditPage.tsx
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import {
+	useQuery,
+	useMutation,
+	useQueryClient,
+} from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+	fetchCarById,
+	updateCar,
+	deleteCar,
+} from '../../services/apiService';
+import {
+	ManagedImagePayload,
+	ImageMeta,
+	ExistingImagePayload,
+	RestApiCar,
+	ImageFilePayload,
+} from '../../types/api';
+import Loader from '../../components/Loader';
+import ImageManagerModal from '../../components/admin/ImageManagerModal';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid';
+import { Save, Trash2 } from 'lucide-react';
+
+const CarEditPage: React.FC = () => {
+	const { carId } = useParams<{ carId: string }>();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
+	const [name, setName] = useState('');
+	const [price, setPrice] = useState('');
+	const [description, setDescription] = useState('');
+	const [managedImages, setManagedImages] = useState<
+		ManagedImagePayload[]
+	>([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const { data: carData, isLoading: isLoadingCar } =
+		useQuery<RestApiCar | null>({
+			queryKey: ['carData', carId],
+			queryFn: () => (carId ? fetchCarById(carId) : Promise.resolve(null)),
+			enabled: !!carId,
+		});
+
+	useEffect(() => {
+		if (carData) {
+			setName(carData.name);
+			setPrice(String(carData.price));
+			setDescription(carData.description);
+			const existingImages: ExistingImagePayload[] = carData.images.map(
+				(img) => ({
+					key: img.id,
+					id: img.id,
+					type: img.type,
+					description: img.description || '',
+					previewUrl: img.urlSingle || img.urlAfter || '',
+					previewUrlBefore: img.urlBefore || undefined,
+					previewUrlAfter: img.urlAfter || undefined,
+				})
+			);
+			setManagedImages(existingImages);
+		}
+	}, [carData]);
+
+	const updateMutation = useMutation({
+		mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+			updateCar(id, formData),
+		onSuccess: (data) => {
+			alert('Автомобиль успешно обновлен!');
+			queryClient.invalidateQueries({ queryKey: ['carsForSale'] });
+			queryClient.invalidateQueries({ queryKey: ['carData', carId] });
+			navigate(`/cars/${data.id}`);
+		},
+		onError: (error) => {
+			alert(`Ошибка при обновлении: ${error.message}`);
+		},
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => deleteCar(id),
+		onSuccess: () => {
+			alert('Автомобиль успешно удален!');
+			queryClient.invalidateQueries({ queryKey: ['carsForSale'] });
+			navigate('/admin/cars');
+		},
+		onError: (error) => {
+			alert(`Ошибка при удалении: ${error.message}`);
+		},
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!carId) return;
+
+		const numericPrice = parseFloat(price);
+		if (isNaN(numericPrice)) {
+			alert('Цена должна быть числом.');
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('name', name);
+		formData.append('price', String(numericPrice));
+		formData.append('description', description);
+
+		const imageIdsToKeep: string[] = [];
+		const newImageMeta: ImageMeta[] = [];
+		const newImageFiles: ImageFilePayload[] = [];
+
+		managedImages.forEach((img) => {
+			if ('id' in img) {
+				imageIdsToKeep.push(img.id);
+			} else {
+				newImageFiles.push(img);
+			}
+		});
+
+		newImageFiles.forEach((img) => {
+			newImageMeta.push({
+				type: img.type,
+				description: img.description,
+			});
+			if (img.type === 'SINGLE') {
+				formData.append('images', img.file, img.file.name);
+			} else {
+				formData.append('images', img.fileBefore, img.fileBefore.name);
+				formData.append('images', img.fileAfter, img.fileAfter.name);
+			}
+		});
+
+		formData.append('imageIdsToKeep', JSON.stringify(imageIdsToKeep));
+		if (newImageMeta.length > 0) {
+			formData.append('imageMeta', JSON.stringify(newImageMeta));
+		}
+
+		updateMutation.mutate({ id: carId, formData });
+	};
+
+	const handleDelete = () => {
+		if (
+			carId &&
+			window.confirm('Вы уверены, что хотите удалить этот автомобиль?')
+		) {
+			deleteMutation.mutate(carId);
+		}
+	};
+
+	const handleRemoveImage = (key: string) => {
+		setManagedImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
+	if (isLoadingCar) {
+		return <Loader size='lg' text='Загрузка данных автомобиля...' />;
+	}
+
+	if (!carData) {
+		return <p>Автомобиль не найден.</p>;
+	}
+
+	return (
+		<>
+			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+				<div className='flex justify-between items-center mb-6'>
+					<h1 className='text-2xl font-bold'>
+						Редактирование: {carData.name}
+					</h1>
+					<button
+						onClick={handleDelete}
+						disabled={deleteMutation.isPending}
+						className='flex items-center bg-red-800 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50'
+					>
+						<Trash2 size={16} className='mr-2' />
+						Удалить
+					</button>
+				</div>
+				<form onSubmit={handleSubmit} className='space-y-6'>
+					<div>
+						<label
+							htmlFor='name'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Название (марка, модель)
+						</label>
+						<input
+							id='name'
+							type='text'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							required
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+					<div>
+						<label
+							htmlFor='price'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Цена (в рублях)
+						</label>
+						<input
+							id='price'
+							type='number'
+							value={price}
+							onChange={(e) => setPrice(e.target.value)}
+							required
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+					<div>
+						<label
+							htmlFor='description'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Описание (поддерживает Markdown)
+						</label>
+						<textarea
+							id='description'
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							required
+							rows={8}
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+
+					<ImagePreviewGrid
+						images={managedImages}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
+					<div className='pt-4'>
+						<button
+							type='submit'
+							disabled={updateMutation.isPending}
+							className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 disabled:bg-gray-500'
+						>
+							{updateMutation.isPending ? (
+								<Loader
+									size='sm'
+									spinnerClassName='border-white border-t-transparent'
+								/>
+							) : (
+								<>
+									<Save size={20} className='mr-2' />
+									Сохранить изменения
+								</>
+							)}
+						</button>
+					</div>
+				</form>
+			</div>
+			<ImageManagerModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				onSave={setManagedImages}
+				initialImages={managedImages}
+			/>
+		</>
+	);
+};
+
+export default CarEditPage;
+
+```
+
+## src/pages/admin/CarListPage.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchCars } from '../../services/apiService';
+import { TransformedCarPreview } from '../../types/api';
+import Loader from '../../components/Loader';
+import { PlusCircle, Edit } from 'lucide-react';
+
+const CarListPage: React.FC = () => {
+	const {
+		data: cars,
+		isLoading,
+		error,
+	} = useQuery<TransformedCarPreview[]>({
+		queryKey: ['carsForSale'],
+		queryFn: fetchCars,
+	});
+
+	if (isLoading) {
+		return (
+			<div className='flex justify-center items-center h-64'>
+				<Loader size='lg' text='Загрузка списка автомобилей...' />
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className='text-center text-red-500'>
+				Ошибка загрузки списка автомобилей.
+			</div>
+		);
+	}
+
+	return (
+		<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+			<div className='flex justify-between items-center mb-6'>
+				<h1 className='text-2xl font-bold'>Управление автомобилями</h1>
+				<Link
+					to='/admin/cars/new'
+					className='flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+				>
+					<PlusCircle size={20} className='mr-2' />
+					Создать
+				</Link>
+			</div>
+			<div className='overflow-x-auto'>
+				<table className='min-w-full bg-gray-900 rounded-md'>
+					<thead>
+						<tr className='border-b border-gray-700'>
+							<th className='text-left p-4'>Название</th>
+							<th className='text-left p-4'>Цена</th>
+							<th className='text-right p-4'>Действия</th>
+						</tr>
+					</thead>
+					<tbody>
+						{cars && cars.length > 0 ? (
+							cars.map((car) => (
+								<tr
+									key={car.id}
+									className='border-b border-gray-700 hover:bg-gray-800'
+								>
+									<td className='p-4'>{car.title}</td>
+									<td className='p-4'>{car.cost}</td>
+									<td className='p-4 text-right'>
+										<Link
+											to={`/admin/cars/${car.id}/edit`}
+											className='inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-md transition-colors text-sm'
+										>
+											<Edit size={16} className='mr-1.5' />
+											Редактировать
+										</Link>
+									</td>
+								</tr>
+							))
+						) : (
+							<tr>
+								<td colSpan={3} className='text-center p-6 text-gray-400'>
+									Автомобили на продажу еще не добавлены.
+								</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	);
+};
+
+export default CarListPage;
 
 ```
 
@@ -3370,10 +4100,15 @@ export default ProtectedRoute;
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createService } from '../../services/apiService';
-import { ImageFilePayload, ImageMeta } from '../../types/api';
+import {
+	ImageFilePayload,
+	ImageMeta,
+	ManagedImagePayload,
+} from '../../types/api';
 import Loader from '../../components/Loader';
 import ImageManagerModal from '../../components/admin/ImageManagerModal';
-import { Save, ImagePlus } from 'lucide-react';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid';
+import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ServiceCreatePage: React.FC = () => {
@@ -3421,11 +4156,24 @@ const ServiceCreatePage: React.FC = () => {
 		mutation.mutate(formData);
 	};
 
+	const handleImageSave = (managedImages: ManagedImagePayload[]) => {
+		const newImageFiles = managedImages.filter(
+			(img): img is ImageFilePayload => !('id' in img)
+		);
+		setImages(newImageFiles);
+	};
+
+	const handleRemoveImage = (key: string) => {
+		setImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
 	return (
 		<>
 			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
 				<h1 className='text-2xl font-bold mb-6'>Создать запись: Услуга</h1>
-				<form onSubmit={handleSubmit} className='space-y-4'>
+				<form onSubmit={handleSubmit} className='space-y-6'>
 					<div>
 						<label
 							htmlFor='name'
@@ -3458,19 +4206,13 @@ const ServiceCreatePage: React.FC = () => {
 							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
 						/>
 					</div>
-					<div>
-						<label className='block text-sm font-medium text-gray-300 mb-2'>
-							Изображения ({images.length} шт.)
-						</label>
-						<button
-							type='button'
-							onClick={() => setIsModalOpen(true)}
-							className='w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md'
-						>
-							<ImagePlus size={20} className='mr-2' />
-							Управление изображениями
-						</button>
-					</div>
+
+					<ImagePreviewGrid
+						images={images}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
 					<div className='pt-4'>
 						<button
 							type='submit'
@@ -3495,7 +4237,7 @@ const ServiceCreatePage: React.FC = () => {
 			<ImageManagerModal
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
-				onSave={setImages}
+				onSave={handleImageSave}
 				initialImages={images}
 			/>
 		</>
@@ -3503,6 +4245,346 @@ const ServiceCreatePage: React.FC = () => {
 };
 
 export default ServiceCreatePage;
+
+```
+
+## src/pages/admin/ServiceEditPage.tsx
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import {
+	useQuery,
+	useMutation,
+	useQueryClient,
+} from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+	fetchServiceById,
+	updateService,
+	deleteService,
+} from '../../services/apiService';
+import {
+	ManagedImagePayload,
+	ImageMeta,
+	ExistingImagePayload,
+	RestApiService,
+	ImageFilePayload,
+} from '../../types/api';
+import Loader from '../../components/Loader';
+import ImageManagerModal from '../../components/admin/ImageManagerModal';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid';
+import { Save, Trash2 } from 'lucide-react';
+
+const ServiceEditPage: React.FC = () => {
+	const { serviceId } = useParams<{ serviceId: string }>();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
+	const [name, setName] = useState('');
+	const [description, setDescription] = useState('');
+	const [managedImages, setManagedImages] = useState<
+		ManagedImagePayload[]
+	>([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const { data: serviceData, isLoading: isLoadingService } =
+		useQuery<RestApiService | null>({
+			queryKey: ['service', serviceId],
+			queryFn: () =>
+				serviceId ? fetchServiceById(serviceId) : Promise.resolve(null),
+			enabled: !!serviceId,
+		});
+
+	useEffect(() => {
+		if (serviceData) {
+			setName(serviceData.name);
+			setDescription(serviceData.description);
+			const existingImages: ExistingImagePayload[] =
+				serviceData.images.map((img) => ({
+					key: img.id,
+					id: img.id,
+					type: img.type,
+					description: img.description || '',
+					previewUrl: img.urlSingle || img.urlAfter || '',
+					previewUrlBefore: img.urlBefore || undefined,
+					previewUrlAfter: img.urlAfter || undefined,
+				}));
+			setManagedImages(existingImages);
+		}
+	}, [serviceData]);
+
+	const updateMutation = useMutation({
+		mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+			updateService(id, formData),
+		onSuccess: (data) => {
+			alert('Услуга успешно обновлена!');
+			queryClient.invalidateQueries({ queryKey: ['services'] });
+			queryClient.invalidateQueries({ queryKey: ['service', serviceId] });
+			navigate(`/services/${data.id}`);
+		},
+		onError: (error) => {
+			alert(`Ошибка при обновлении: ${error.message}`);
+		},
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => deleteService(id),
+		onSuccess: () => {
+			alert('Услуга успешно удалена!');
+			queryClient.invalidateQueries({ queryKey: ['services'] });
+			navigate('/admin/services');
+		},
+		onError: (error) => {
+			alert(`Ошибка при удалении: ${error.message}`);
+		},
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!serviceId) return;
+
+		const formData = new FormData();
+		formData.append('name', name);
+		formData.append('description', description);
+
+		const imageIdsToKeep: string[] = [];
+		const newImageMeta: ImageMeta[] = [];
+		const newImageFiles: ImageFilePayload[] = [];
+
+		managedImages.forEach((img) => {
+			if ('id' in img) {
+				imageIdsToKeep.push(img.id);
+			} else {
+				newImageFiles.push(img);
+			}
+		});
+
+		newImageFiles.forEach((img) => {
+			newImageMeta.push({
+				type: img.type,
+				description: img.description,
+			});
+			if (img.type === 'SINGLE') {
+				formData.append('images', img.file, img.file.name);
+			} else {
+				formData.append('images', img.fileBefore, img.fileBefore.name);
+				formData.append('images', img.fileAfter, img.fileAfter.name);
+			}
+		});
+
+		formData.append('imageIdsToKeep', JSON.stringify(imageIdsToKeep));
+		if (newImageMeta.length > 0) {
+			formData.append('imageMeta', JSON.stringify(newImageMeta));
+		}
+
+		updateMutation.mutate({ id: serviceId, formData });
+	};
+
+	const handleDelete = () => {
+		if (
+			serviceId &&
+			window.confirm('Вы уверены, что хотите удалить эту услугу?')
+		) {
+			deleteMutation.mutate(serviceId);
+		}
+	};
+
+	const handleRemoveImage = (key: string) => {
+		setManagedImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
+	if (isLoadingService) {
+		return <Loader size='lg' text='Загрузка данных услуги...' />;
+	}
+
+	if (!serviceData) {
+		return <p>Услуга не найдена.</p>;
+	}
+
+	return (
+		<>
+			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+				<div className='flex justify-between items-center mb-6'>
+					<h1 className='text-2xl font-bold'>
+						Редактирование: {serviceData.name}
+					</h1>
+					<button
+						onClick={handleDelete}
+						disabled={deleteMutation.isPending}
+						className='flex items-center bg-red-800 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50'
+					>
+						<Trash2 size={16} className='mr-2' />
+						Удалить
+					</button>
+				</div>
+				<form onSubmit={handleSubmit} className='space-y-6'>
+					<div>
+						<label
+							htmlFor='name'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Название услуги
+						</label>
+						<input
+							id='name'
+							type='text'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							required
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+					<div>
+						<label
+							htmlFor='description'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Описание (поддерживает Markdown)
+						</label>
+						<textarea
+							id='description'
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							required
+							rows={8}
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+
+					<ImagePreviewGrid
+						images={managedImages}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
+					<div className='pt-4'>
+						<button
+							type='submit'
+							disabled={updateMutation.isPending}
+							className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 disabled:bg-gray-500'
+						>
+							{updateMutation.isPending ? (
+								<Loader
+									size='sm'
+									spinnerClassName='border-white border-t-transparent'
+								/>
+							) : (
+								<>
+									<Save size={20} className='mr-2' />
+									Сохранить изменения
+								</>
+							)}
+						</button>
+					</div>
+				</form>
+			</div>
+			<ImageManagerModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				onSave={setManagedImages}
+				initialImages={managedImages}
+			/>
+		</>
+	);
+};
+
+export default ServiceEditPage;
+
+```
+
+## src/pages/admin/ServiceListPage.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchServices } from '../../services/apiService';
+import { TransformedService } from '../../types/api';
+import Loader from '../../components/Loader';
+import { PlusCircle, Edit } from 'lucide-react';
+
+const ServiceListPage: React.FC = () => {
+	const {
+		data: services,
+		isLoading,
+		error,
+	} = useQuery<TransformedService[]>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
+
+	if (isLoading) {
+		return (
+			<div className='flex justify-center items-center h-64'>
+				<Loader size='lg' text='Загрузка списка услуг...' />
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className='text-center text-red-500'>
+				Ошибка загрузки списка услуг.
+			</div>
+		);
+	}
+
+	return (
+		<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+			<div className='flex justify-between items-center mb-6'>
+				<h1 className='text-2xl font-bold'>Управление услугами</h1>
+				<Link
+					to='/admin/services/new'
+					className='flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+				>
+					<PlusCircle size={20} className='mr-2' />
+					Создать
+				</Link>
+			</div>
+			<div className='overflow-x-auto'>
+				<table className='min-w-full bg-gray-900 rounded-md'>
+					<thead>
+						<tr className='border-b border-gray-700'>
+							<th className='text-left p-4'>Название</th>
+							<th className='text-right p-4'>Действия</th>
+						</tr>
+					</thead>
+					<tbody>
+						{services && services.length > 0 ? (
+							services.map((service) => (
+								<tr
+									key={service.id}
+									className='border-b border-gray-700 hover:bg-gray-800'
+								>
+									<td className='p-4'>{service.title}</td>
+									<td className='p-4 text-right'>
+										<Link
+											to={`/admin/services/${service.id}/edit`}
+											className='inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-md transition-colors text-sm'
+										>
+											<Edit size={16} className='mr-1.5' />
+											Редактировать
+										</Link>
+									</td>
+								</tr>
+							))
+						) : (
+							<tr>
+								<td colSpan={2} className='text-center p-6 text-gray-400'>
+									Услуги еще не добавлены.
+								</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	);
+};
+
+export default ServiceListPage;
 
 ```
 
@@ -3661,11 +4743,13 @@ import {
 import {
 	ImageFilePayload,
 	ImageMeta,
+	ManagedImagePayload,
 	TransformedService,
 } from '../../types/api';
 import Loader from '../../components/Loader';
 import ImageManagerModal from '../../components/admin/ImageManagerModal';
-import { Save, ImagePlus } from 'lucide-react';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid';
+import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const WorkExampleCreatePage: React.FC = () => {
@@ -3728,13 +4812,26 @@ const WorkExampleCreatePage: React.FC = () => {
 		mutation.mutate(formData);
 	};
 
+	const handleImageSave = (managedImages: ManagedImagePayload[]) => {
+		const newImageFiles = managedImages.filter(
+			(img): img is ImageFilePayload => !('id' in img)
+		);
+		setImages(newImageFiles);
+	};
+
+	const handleRemoveImage = (key: string) => {
+		setImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
 	return (
 		<>
 			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
 				<h1 className='text-2xl font-bold mb-6'>
 					Создать запись: Пример работы
 				</h1>
-				<form onSubmit={handleSubmit} className='space-y-4'>
+				<form onSubmit={handleSubmit} className='space-y-6'>
 					<div>
 						<label
 							htmlFor='name'
@@ -3810,19 +4907,13 @@ const WorkExampleCreatePage: React.FC = () => {
 							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
 						/>
 					</div>
-					<div>
-						<label className='block text-sm font-medium text-gray-300 mb-2'>
-							Изображения ({images.length} шт.)
-						</label>
-						<button
-							type='button'
-							onClick={() => setIsModalOpen(true)}
-							className='w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md'
-						>
-							<ImagePlus size={20} className='mr-2' />
-							Управление изображениями
-						</button>
-					</div>
+
+					<ImagePreviewGrid
+						images={images}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
 					<div className='pt-4'>
 						<button
 							type='submit'
@@ -3847,7 +4938,7 @@ const WorkExampleCreatePage: React.FC = () => {
 			<ImageManagerModal
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
-				onSave={setImages}
+				onSave={handleImageSave}
 				initialImages={images}
 			/>
 		</>
@@ -3858,12 +4949,416 @@ export default WorkExampleCreatePage;
 
 ```
 
+## src/pages/admin/WorkExampleEditPage.tsx
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import {
+	useQuery,
+	useMutation,
+	useQueryClient,
+} from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+	fetchWorkExampleById,
+	updateWorkExample,
+	deleteWorkExample,
+	fetchServices,
+} from '../../services/apiService';
+import {
+	ManagedImagePayload,
+	ImageMeta,
+	ExistingImagePayload,
+	RestApiWorkExample,
+	TransformedService,
+	ImageFilePayload,
+} from '../../types/api';
+import Loader from '../../components/Loader';
+import ImageManagerModal from '../../components/admin/ImageManagerModal';
+import ImagePreviewGrid from '../../components/admin/ImagePreviewGrid';
+import { Save, Trash2 } from 'lucide-react';
+
+const WorkExampleEditPage: React.FC = () => {
+	const { workExampleId } = useParams<{ workExampleId: string }>();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
+	const [name, setName] = useState('');
+	const [date, setDate] = useState('');
+	const [description, setDescription] = useState('');
+	const [serviceId, setServiceId] = useState('');
+	const [managedImages, setManagedImages] = useState<
+		ManagedImagePayload[]
+	>([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const { data: services, isLoading: isLoadingServices } = useQuery<
+		TransformedService[]
+	>({
+		queryKey: ['services'],
+		queryFn: fetchServices,
+	});
+
+	const { data: workExampleData, isLoading: isLoadingWorkExample } =
+		useQuery<RestApiWorkExample | null>({
+			queryKey: ['workExampleData', workExampleId],
+			queryFn: () =>
+				workExampleId
+					? fetchWorkExampleById(workExampleId)
+					: Promise.resolve(null),
+			enabled: !!workExampleId,
+		});
+
+	useEffect(() => {
+		if (workExampleData) {
+			setName(workExampleData.name);
+			setDate(new Date(workExampleData.date).toISOString().split('T')[0]);
+			setDescription(workExampleData.description);
+			setServiceId(workExampleData.serviceId);
+			const existingImages: ExistingImagePayload[] =
+				workExampleData.images.map((img) => ({
+					key: img.id,
+					id: img.id,
+					type: img.type,
+					description: img.description || '',
+					previewUrl: img.urlSingle || img.urlAfter || '',
+					previewUrlBefore: img.urlBefore || undefined,
+					previewUrlAfter: img.urlAfter || undefined,
+				}));
+			setManagedImages(existingImages);
+		}
+	}, [workExampleData]);
+
+	const updateMutation = useMutation({
+		mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+			updateWorkExample(id, formData),
+		onSuccess: (data) => {
+			alert('Пример работы успешно обновлен!');
+			queryClient.invalidateQueries({ queryKey: ['workExamples'] });
+			queryClient.invalidateQueries({
+				queryKey: ['workExampleData', workExampleId],
+			});
+			navigate(`/work-examples/${data.id}`);
+		},
+		onError: (error) => {
+			alert(`Ошибка при обновлении: ${error.message}`);
+		},
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => deleteWorkExample(id),
+		onSuccess: () => {
+			alert('Пример работы успешно удален!');
+			queryClient.invalidateQueries({ queryKey: ['workExamples'] });
+			navigate('/admin/work-examples');
+		},
+		onError: (error) => {
+			alert(`Ошибка при удалении: ${error.message}`);
+		},
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!workExampleId || !serviceId) {
+			alert('Пожалуйста, выберите связанную услугу.');
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('name', name);
+		formData.append('date', new Date(date).toISOString());
+		formData.append('description', description);
+		formData.append('serviceId', serviceId);
+
+		const imageIdsToKeep: string[] = [];
+		const newImageMeta: ImageMeta[] = [];
+		const newImageFiles: ImageFilePayload[] = [];
+
+		managedImages.forEach((img) => {
+			if ('id' in img) {
+				imageIdsToKeep.push(img.id);
+			} else {
+				newImageFiles.push(img);
+			}
+		});
+
+		newImageFiles.forEach((img) => {
+			newImageMeta.push({
+				type: img.type,
+				description: img.description,
+			});
+			if (img.type === 'SINGLE') {
+				formData.append('images', img.file, img.file.name);
+			} else {
+				formData.append('images', img.fileBefore, img.fileBefore.name);
+				formData.append('images', img.fileAfter, img.fileAfter.name);
+			}
+		});
+
+		formData.append('imageIdsToKeep', JSON.stringify(imageIdsToKeep));
+		if (newImageMeta.length > 0) {
+			formData.append('imageMeta', JSON.stringify(newImageMeta));
+		}
+
+		updateMutation.mutate({ id: workExampleId, formData });
+	};
+
+	const handleDelete = () => {
+		if (
+			workExampleId &&
+			window.confirm('Вы уверены, что хотите удалить этот пример работы?')
+		) {
+			deleteMutation.mutate(workExampleId);
+		}
+	};
+
+	const handleRemoveImage = (key: string) => {
+		setManagedImages((currentImages) =>
+			currentImages.filter((img) => img.key !== key)
+		);
+	};
+
+	if (isLoadingWorkExample || isLoadingServices) {
+		return <Loader size='lg' text='Загрузка данных...' />;
+	}
+
+	if (!workExampleData) {
+		return <p>Пример работы не найден.</p>;
+	}
+
+	return (
+		<>
+			<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+				<div className='flex justify-between items-center mb-6'>
+					<h1 className='text-2xl font-bold'>
+						Редактирование: {workExampleData.name}
+					</h1>
+					<button
+						onClick={handleDelete}
+						disabled={deleteMutation.isPending}
+						className='flex items-center bg-red-800 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50'
+					>
+						<Trash2 size={16} className='mr-2' />
+						Удалить
+					</button>
+				</div>
+				<form onSubmit={handleSubmit} className='space-y-6'>
+					<div>
+						<label
+							htmlFor='name'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Название работы
+						</label>
+						<input
+							id='name'
+							type='text'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							required
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+						<div>
+							<label
+								htmlFor='serviceId'
+								className='block text-sm font-medium text-gray-300 mb-1'
+							>
+								Связанная услуга
+							</label>
+							<select
+								id='serviceId'
+								value={serviceId}
+								onChange={(e) => setServiceId(e.target.value)}
+								required
+								className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+							>
+								<option value='' disabled>
+									Выберите услугу
+								</option>
+								{services?.map((service) => (
+									<option key={service.id} value={service.id}>
+										{service.title}
+									</option>
+								))}
+							</select>
+						</div>
+						<div>
+							<label
+								htmlFor='date'
+								className='block text-sm font-medium text-gray-300 mb-1'
+							>
+								Дата выполнения
+							</label>
+							<input
+								id='date'
+								type='date'
+								value={date}
+								onChange={(e) => setDate(e.target.value)}
+								required
+								className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+							/>
+						</div>
+					</div>
+					<div>
+						<label
+							htmlFor='description'
+							className='block text-sm font-medium text-gray-300 mb-1'
+						>
+							Описание (поддерживает Markdown)
+						</label>
+						<textarea
+							id='description'
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							required
+							rows={6}
+							className='w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500'
+						/>
+					</div>
+
+					<ImagePreviewGrid
+						images={managedImages}
+						onManageClick={() => setIsModalOpen(true)}
+						onRemoveClick={handleRemoveImage}
+					/>
+
+					<div className='pt-4'>
+						<button
+							type='submit'
+							disabled={updateMutation.isPending}
+							className='w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 disabled:bg-gray-500'
+						>
+							{updateMutation.isPending ? (
+								<Loader
+									size='sm'
+									spinnerClassName='border-white border-t-transparent'
+								/>
+							) : (
+								<>
+									<Save size={20} className='mr-2' />
+									Сохранить изменения
+								</>
+							)}
+						</button>
+					</div>
+				</form>
+			</div>
+			<ImageManagerModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				onSave={setManagedImages}
+				initialImages={managedImages}
+			/>
+		</>
+	);
+};
+
+export default WorkExampleEditPage;
+
+```
+
+## src/pages/admin/WorkExampleListPage.tsx
+
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWorkExamples } from '../../services/apiService';
+import { TransformedWorkExamplePreview } from '../../types/api';
+import Loader from '../../components/Loader';
+import { PlusCircle, Edit } from 'lucide-react';
+
+const WorkExampleListPage: React.FC = () => {
+	const {
+		data: workExamples,
+		isLoading,
+		error,
+	} = useQuery<TransformedWorkExamplePreview[]>({
+		queryKey: ['workExamples'],
+		queryFn: fetchWorkExamples,
+	});
+
+	if (isLoading) {
+		return (
+			<div className='flex justify-center items-center h-64'>
+				<Loader size='lg' text='Загрузка примеров работ...' />
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className='text-center text-red-500'>
+				Ошибка загрузки примеров работ.
+			</div>
+		);
+	}
+
+	return (
+		<div className='bg-gray-800 p-6 rounded-lg shadow-lg'>
+			<div className='flex justify-between items-center mb-6'>
+				<h1 className='text-2xl font-bold'>Управление примерами работ</h1>
+				<Link
+					to='/admin/work-examples/new'
+					className='flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors'
+				>
+					<PlusCircle size={20} className='mr-2' />
+					Создать
+				</Link>
+			</div>
+			<div className='overflow-x-auto'>
+				<table className='min-w-full bg-gray-900 rounded-md'>
+					<thead>
+						<tr className='border-b border-gray-700'>
+							<th className='text-left p-4'>Название</th>
+							<th className='text-right p-4'>Действия</th>
+						</tr>
+					</thead>
+					<tbody>
+						{workExamples && workExamples.length > 0 ? (
+							workExamples.map((item) => (
+								<tr
+									key={item.id}
+									className='border-b border-gray-700 hover:bg-gray-800'
+								>
+									<td className='p-4'>{item.title}</td>
+									<td className='p-4 text-right'>
+										<Link
+											to={`/admin/work-examples/${item.id}/edit`}
+											className='inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-md transition-colors text-sm'
+										>
+											<Edit size={16} className='mr-1.5' />
+											Редактировать
+										</Link>
+									</td>
+								</tr>
+							))
+						) : (
+							<tr>
+								<td colSpan={2} className='text-center p-6 text-gray-400'>
+									Примеры работ еще не добавлены.
+								</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	);
+};
+
+export default WorkExampleListPage;
+
+```
+
 ## src/services/apiService.ts
 
 ```typescript
 import {
 	RestApiCar,
-	RestApiImage, // <-- ДОБАВЛЕН ЭТОТ ИМПОРТ
+	RestApiImage,
 	RestApiService,
 	RestApiSettings,
 	RestApiWorkExample,
@@ -3882,7 +5377,7 @@ import {
 } from '../lib/utils';
 
 // Базовый URL вашего бэкенда
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = '';
 const API_PREFIX = '/api';
 
 // Вспомогательная функция для выполнения GET запросов
@@ -4035,14 +5530,14 @@ export const fetchServices = async (): Promise<TransformedService[]> => {
 };
 
 /**
- * Получает одну услугу по ID.
+ * Получает одну услугу по ID. Возвращает "сырые" данные с сервера.
  */
 export const fetchServiceById = async (
 	id: string
 ): Promise<RestApiService | null> => {
 	try {
 		const service = await apiFetch<RestApiService>(`/services/${id}`);
-		// Дополняем URL изображений
+		// Дополняем URL изображений, чтобы они работали на клиенте
 		if (service.images) {
 			service.images = service.images.map((img) => ({
 				...img,
@@ -4065,6 +5560,23 @@ export const createService = (
 	formData: FormData
 ): Promise<RestApiService> => {
 	return apiMutate<RestApiService>('/services', 'POST', formData);
+};
+
+/**
+ * Обновляет существующую услугу.
+ */
+export const updateService = (
+	id: string,
+	formData: FormData
+): Promise<RestApiService> => {
+	return apiMutate<RestApiService>(`/services/${id}`, 'PUT', formData);
+};
+
+/**
+ * Удаляет услугу по ID.
+ */
+export const deleteService = (id: string): Promise<void> => {
+	return apiMutate<void>(`/services/${id}`, 'DELETE');
 };
 
 /**
@@ -4098,19 +5610,23 @@ export const fetchWorkExamples = async (): Promise<
 };
 
 /**
- * Получает один пример работы по ID.
+ * Получает один пример работы по ID. Возвращает "сырые" данные с сервера.
  */
 export const fetchWorkExampleById = async (
 	id: string
-): Promise<TransformedWorkExamplePageData | null> => {
+): Promise<RestApiWorkExample | null> => {
 	try {
 		const we = await apiFetch<RestApiWorkExample>(`/work-examples/${id}`);
-		return {
-			id: we.id,
-			title: we.name,
-			description: we.description,
-			galleryItems: we.images.map(transformRestApiImage),
-		};
+		// Дополняем URL изображений
+		if (we.images) {
+			we.images = we.images.map((img) => ({
+				...img,
+				urlSingle: getFullImageUrl(img.urlSingle),
+				urlBefore: getFullImageUrl(img.urlBefore),
+				urlAfter: getFullImageUrl(img.urlAfter),
+			}));
+		}
+		return we;
 	} catch (error) {
 		console.error(`Ошибка загрузки примера работы с ID ${id}:`, error);
 		return null;
@@ -4124,6 +5640,27 @@ export const createWorkExample = (
 	formData: FormData
 ): Promise<RestApiWorkExample> => {
 	return apiMutate<RestApiWorkExample>('/work-examples', 'POST', formData);
+};
+
+/**
+ * Обновляет существующий пример работы.
+ */
+export const updateWorkExample = (
+	id: string,
+	formData: FormData
+): Promise<RestApiWorkExample> => {
+	return apiMutate<RestApiWorkExample>(
+		`/work-examples/${id}`,
+		'PUT',
+		formData
+	);
+};
+
+/**
+ * Удаляет пример работы по ID.
+ */
+export const deleteWorkExample = (id: string): Promise<void> => {
+	return apiMutate<void>(`/work-examples/${id}`, 'DELETE');
 };
 
 /**
@@ -4144,24 +5681,23 @@ export const fetchCars = async (): Promise<TransformedCarPreview[]> => {
 };
 
 /**
- * Получает один автомобиль по ID.
+ * Получает один автомобиль по ID. Возвращает "сырые" данные с сервера.
  */
 export const fetchCarById = async (
 	id: string
-): Promise<TransformedCarPageData | null> => {
+): Promise<RestApiCar | null> => {
 	try {
 		const car = await apiFetch<RestApiCar>(`/cars/${id}`);
-		return {
-			id: car.id,
-			title: car.name,
-			cost: new Intl.NumberFormat('ru-RU', {
-				style: 'currency',
-				currency: 'RUB',
-				minimumFractionDigits: 0,
-			}).format(car.price),
-			description: car.description,
-			images: car.images.map(transformRestApiImage),
-		};
+		// Дополняем URL изображений
+		if (car.images) {
+			car.images = car.images.map((img) => ({
+				...img,
+				urlSingle: getFullImageUrl(img.urlSingle),
+				urlBefore: getFullImageUrl(img.urlBefore),
+				urlAfter: getFullImageUrl(img.urlAfter),
+			}));
+		}
+		return car;
 	} catch (error) {
 		console.error(`Ошибка загрузки автомобиля с ID ${id}:`, error);
 		return null;
@@ -4173,6 +5709,23 @@ export const fetchCarById = async (
  */
 export const createCar = (formData: FormData): Promise<RestApiCar> => {
 	return apiMutate<RestApiCar>('/cars', 'POST', formData);
+};
+
+/**
+ * Обновляет существующий автомобиль.
+ */
+export const updateCar = (
+	id: string,
+	formData: FormData
+): Promise<RestApiCar> => {
+	return apiMutate<RestApiCar>(`/cars/${id}`, 'PUT', formData);
+};
+
+/**
+ * Удаляет автомобиль по ID.
+ */
+export const deleteCar = (id: string): Promise<void> => {
+	return apiMutate<void>(`/cars/${id}`, 'DELETE');
 };
 
 ```
@@ -4280,6 +5833,25 @@ export type ImageFilePayload =
 			previewUrlBefore: string;
 			previewUrlAfter: string;
 	  };
+
+/**
+ * Внутренний тип для UI для представления уже загруженного изображения в модалке.
+ */
+export interface ExistingImagePayload {
+	key: string; // db id
+	id: string; // db id
+	type: 'SINGLE' | 'BEFORE_AFTER';
+	description: string;
+	// Для рендеринга
+	previewUrl: string;
+	previewUrlBefore?: string;
+	previewUrlAfter?: string;
+}
+
+/**
+ * Объединенный тип для ImageManagerModal, может содержать как новые, так и существующие изображения.
+ */
+export type ManagedImagePayload = ImageFilePayload | ExistingImagePayload;
 
 /**
  * Тип для создания мета-информации для изображений при отправке FormData.
@@ -4418,7 +5990,1132 @@ export interface TransformedCarPageData {
 ```
 
 Отвечай на русском языке это очень важно. 
-Пиши код полностью, не пропускай и не сокращай. 
 
-Теперь сделай редактирование записей
+Вот nginx файл
 
+# HTTP -> HTTPS редирект (остается без изменений)
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name tradeauto-group.ru www.tradeauto-group.ru;
+
+    location /.well-known/acme-challenge/ {
+        root /var/AutoServiceGroup/dist; # <-- Убедитесь, что путь к фронтенду верный
+        allow all;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+    access_log /var/log/nginx/tradeauto-group.ru.http.access.log;
+    error_log /var/log/nginx/tradeauto-group.ru.http.error.log;
+}
+
+# Основная конфигурация HTTPS
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name tradeauto-group.ru www.tradeauto-group.ru;
+
+    # SSL сертификаты (остаются без изменений)
+    ssl_certificate /etc/letsencrypt/live/tradeauto-group.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tradeauto-group.ru/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    access_log /var/log/nginx/tradeauto-group.ru.https.access.log;
+    error_log /var/log/nginx/tradeauto-group.ru.https.error.log;
+
+    client_max_body_size 100M;
+
+    # --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+
+    # 1. Раздача загруженных изображений
+    # Путь изменен на папку uploads вашего нового проекта.
+    location /uploads/ {
+        alias /var/auto-service-backend/uploads/;
+        try_files $uri =404;
+        expires 1M;
+        add_header Cache-Control "public";
+    }
+
+    # 2. Проксирование запросов к API
+    # Упрощен location, так как все роуты начинаются с /api/
+    # Порт изменен на 3001, на котором работает ваш новый бэкенд.
+    location /api/ {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_pass_request_headers on;
+    }
+
+    # 3. Раздача статики фронтенда (остается как было, но убедитесь, что путь верный)
+    location / {
+        root /var/AutoServiceGroup/dist; # <-- ПУТЬ К ВАШЕМУ ФРОНТЕНД-ПРИЛОЖЕНИЮ
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+
+А вот файлы сервера
+
+# Project Structure
+
+```
+├── prisma
+│   ├── migrations
+│   │   ├── 20250611174926_init
+│   │   │   └── migration.sql
+│   │   └── migration_lock.toml
+│   └── schema.prisma
+├── src
+│   ├── controllers
+│   │   ├── car.controller.js
+│   │   ├── service.controller.js
+│   │   ├── settings.controller.js
+│   │   └── workExample.controller.js
+│   ├── lib
+│   │   └── prisma.js
+│   ├── middleware
+│   │   └── upload.js
+│   ├── routes
+│   │   ├── car.routes.js
+│   │   ├── index.js
+│   │   ├── service.routes.js
+│   │   ├── settings.routes.js
+│   │   └── workExample.routes.js
+│   ├── app.js
+│   └── server.js
+├── docker-compose.yml
+├── package-lock.json
+├── package.json
+└── vite.config.ts
+```
+
+# File Contents
+
+## src/app.js
+
+```javascript
+// src/app.js
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import apiRouter from './routes/index.js';
+
+// Создаем экземпляр Express
+const app = express();
+
+// Middleware для обработки CORS-запросов
+app.use(cors());
+
+// Middleware для парсинга JSON-тела запросов
+app.use(express.json());
+
+// Middleware для раздачи статических файлов из папки 'uploads'
+// Теперь файлы будут доступны по URL /uploads/filename.jpg
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// Основной роутер для API
+app.use('/api', apiRouter);
+
+// Простой маршрут для проверки работы сервера
+app.get('/', (req, res) => {
+	res.send('Auto Service API is running!');
+});
+
+export default app;
+
+```
+
+## src/controllers/car.controller.js
+
+```javascript
+// src/controllers/car.controller.js
+import prisma from '../lib/prisma.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { ImageType } from '@prisma/client';
+
+// Хелпер для удаления файлов
+const deleteFile = async (filePath) => {
+	try {
+		// filePath будет вида /uploads/image.png, убираем /
+		const fullPath = path.join(process.cwd(), filePath);
+		await fs.unlink(fullPath);
+	} catch (error) {
+		// Не страшно, если файл уже удален, но логируем другие ошибки
+		if (error.code !== 'ENOENT') {
+			console.error(`Failed to delete file: ${filePath}`, error);
+		}
+	}
+};
+
+export const carController = {
+	// GET /api/cars - Получить все автомобили
+	async getAll(req, res) {
+		try {
+			const cars = await prisma.car.findMany({
+				include: { images: true }, // Включаем связанные изображения
+			});
+			res.json(cars);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch cars' });
+		}
+	},
+
+	// GET /api/cars/:id - Получить один автомобиль
+	async getById(req, res) {
+		try {
+			const { id } = req.params;
+			const car = await prisma.car.findUnique({
+				where: { id },
+				include: { images: true },
+			});
+			if (!car) {
+				res.status(404).json({ error: 'Car not found' });
+				return;
+			}
+			res.json(car);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch car' });
+		}
+	},
+
+	// POST /api/cars - Создать новый автомобиль
+	async create(req, res) {
+		try {
+			// Данные из формы (multipart/form-data)
+			const { name, price, description } = req.body;
+			// Файлы от multer
+			const files = req.files;
+
+			// Преобразуем загруженные файлы в формат для создания Image в Prisma
+			const imagesToCreate =
+				files?.map((file) => ({
+					urlSingle: `/uploads/${file.filename}`, // Путь для доступа к файлу
+					type: ImageType.SINGLE,
+				})) || [];
+
+			const newCar = await prisma.car.create({
+				data: {
+					name,
+					price: parseFloat(price), // цена может прийти как строка
+					description,
+					images: {
+						create: imagesToCreate, // Создаем связанные изображения
+					},
+				},
+				include: { images: true },
+			});
+			res.status(201).json(newCar);
+		} catch (error) {
+			res
+				.status(500)
+				.json({ error: 'Failed to create car', details: error.message });
+		}
+	},
+
+	// PUT /api/cars/:id - Обновить автомобиль
+	async update(req, res) {
+		try {
+			const { id } = req.params;
+			const { name, price, description } = req.body;
+			const files = req.files;
+			let oldImages = [];
+
+			const updatedCar = await prisma.$transaction(async (tx) => {
+				// 1. Если загружены новые файлы, удаляем старые записи из БД
+				if (files && files.length > 0) {
+					const carToUpdate = await tx.car.findUnique({
+						where: { id },
+						select: { images: { select: { urlSingle: true } } },
+					});
+					oldImages = carToUpdate?.images || [];
+
+					await tx.image.deleteMany({
+						where: { carId: id },
+					});
+				}
+
+				// 2. Обновляем данные автомобиля и создаем новые записи Image
+				const imagesToCreate =
+					files?.map((file) => ({
+						urlSingle: `/uploads/${file.filename}`,
+						type: ImageType.SINGLE,
+					})) || undefined; // undefined, если файлы не обновляются
+
+				return tx.car.update({
+					where: { id },
+					data: {
+						name,
+						price: price ? parseFloat(price) : undefined,
+						description,
+						...(imagesToCreate && {
+							images: {
+								create: imagesToCreate,
+							},
+						}),
+					},
+					include: { images: true },
+				});
+			});
+
+			// 3. После успешной транзакции удаляем старые файлы с диска
+			for (const image of oldImages) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.json(updatedCar);
+		} catch (error) {
+			res
+				.status(500)
+				.json({ error: 'Failed to update car', details: error.message });
+		}
+	},
+
+	// DELETE /api/cars/:id - Удалить автомобиль
+	async delete(req, res) {
+		try {
+			const { id } = req.params;
+
+			// Получаем пути к файлам перед удалением записи из БД
+			const carToDelete = await prisma.car.findUnique({
+				where: { id },
+				include: { images: true },
+			});
+			const imagesToDelete = carToDelete?.images || [];
+
+			// Удаляем запись из БД (связанные Image удалятся каскадно)
+			await prisma.car.delete({
+				where: { id },
+			});
+
+			// Удаляем файлы с диска
+			for (const image of imagesToDelete) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.status(204).send(); // No Content
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to delete car' });
+		}
+	},
+};
+
+```
+
+## src/controllers/service.controller.js
+
+```javascript
+// src/controllers/service.controller.js
+import prisma from '../lib/prisma.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { ImageType } from '@prisma/client';
+
+// Хелпер для удаления файлов
+const deleteFile = async (filePath) => {
+	try {
+		// filePath будет вида /uploads/image.png, поэтому строим полный путь
+		const fullPath = path.join(process.cwd(), filePath);
+		await fs.unlink(fullPath);
+	} catch (error) {
+		// Не страшно, если файл уже удален, но логируем другие ошибки
+		if (error.code !== 'ENOENT') {
+			console.error(`Failed to delete file: ${filePath}`, error);
+		}
+	}
+};
+
+export const serviceController = {
+	// GET /api/services - Получить все услуги
+	async getAll(req, res) {
+		try {
+			const services = await prisma.service.findMany({
+				include: { images: true }, // Включаем связанные изображения
+			});
+			res.json(services);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch services' });
+		}
+	},
+
+	// GET /api/services/:id - Получить одну услугу
+	async getById(req, res) {
+		try {
+			const { id } = req.params;
+			const service = await prisma.service.findUnique({
+				where: { id },
+				include: { images: true, workExamples: true }, // Включаем изображения и примеры работ
+			});
+			if (!service) {
+				res.status(404).json({ error: 'Service not found' });
+				return;
+			}
+			res.json(service);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch service' });
+		}
+	},
+
+	// POST /api/services - Создать новую услугу
+	async create(req, res) {
+		try {
+			const { name, description } = req.body;
+			const files = req.files;
+
+			const imagesToCreate =
+				files?.map((file) => ({
+					urlSingle: `/uploads/${file.filename}`,
+					type: ImageType.SINGLE,
+				})) || [];
+
+			const newService = await prisma.service.create({
+				data: {
+					name,
+					description,
+					images: {
+						create: imagesToCreate,
+					},
+				},
+				include: { images: true },
+			});
+			res.status(201).json(newService);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to create service',
+				details: error.message,
+			});
+		}
+	},
+
+	// PUT /api/services/:id - Обновить услугу
+	async update(req, res) {
+		try {
+			const { id } = req.params;
+			const { name, description } = req.body;
+			const files = req.files;
+			let oldImages = [];
+
+			const updatedService = await prisma.$transaction(async (tx) => {
+				// 1. Если загружены новые файлы, удаляем старые записи из БД
+				if (files && files.length > 0) {
+					const serviceToUpdate = await tx.service.findUnique({
+						where: { id },
+						select: { images: { select: { urlSingle: true } } },
+					});
+					oldImages = serviceToUpdate?.images || [];
+
+					await tx.image.deleteMany({
+						where: { serviceId: id },
+					});
+				}
+
+				// 2. Обновляем данные и создаем новые записи Image
+				const imagesToCreate =
+					files?.map((file) => ({
+						urlSingle: `/uploads/${file.filename}`,
+						type: ImageType.SINGLE,
+					})) || undefined;
+
+				return tx.service.update({
+					where: { id },
+					data: {
+						name,
+						description,
+						...(imagesToCreate && {
+							images: {
+								create: imagesToCreate,
+							},
+						}),
+					},
+					include: { images: true, workExamples: true },
+				});
+			});
+
+			// 3. После успешной транзакции удаляем старые файлы с диска
+			for (const image of oldImages) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.json(updatedService);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to update service',
+				details: error.message,
+			});
+		}
+	},
+
+	// DELETE /api/services/:id - Удалить услугу
+	async delete(req, res) {
+		try {
+			const { id } = req.params;
+
+			const serviceToDelete = await prisma.service.findUnique({
+				where: { id },
+				include: { images: true },
+			});
+			const imagesToDelete = serviceToDelete?.images || [];
+
+			await prisma.service.delete({
+				where: { id },
+			});
+
+			for (const image of imagesToDelete) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.status(204).send(); // No Content
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to delete service' });
+		}
+	},
+};
+
+```
+
+## src/controllers/settings.controller.js
+
+```javascript
+// src/controllers/settings.controller.js
+import prisma from '../lib/prisma.js';
+
+// Фиксированный ID для единственной строки настроек
+const SETTINGS_ID = 1;
+
+export const settingsController = {
+	// GET /api/settings - Получить настройки
+	async get(req, res) {
+		try {
+			let settings = await prisma.siteSettings.findUnique({
+				where: { id: SETTINGS_ID },
+			});
+
+			// Если настроек еще нет, создаем их с дефолтными значениями
+			if (!settings) {
+				settings = await prisma.siteSettings.create({
+					data: { id: SETTINGS_ID }, // Prisma использует значения по умолчанию из схемы
+				});
+			}
+
+			res.json(settings);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to fetch settings',
+				details: error.message,
+			});
+		}
+	},
+
+	// POST или PUT /api/settings - Обновить настройки
+	async update(req, res) {
+		try {
+			const dataToUpdate = req.body;
+
+			const updatedSettings = await prisma.siteSettings.upsert({
+				where: { id: SETTINGS_ID },
+				update: dataToUpdate,
+				create: {
+					id: SETTINGS_ID,
+					...dataToUpdate,
+				},
+			});
+
+			res.json(updatedSettings);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to update settings',
+				details: error.message,
+			});
+		}
+	},
+};
+
+```
+
+## src/controllers/workExample.controller.js
+
+```javascript
+// src/controllers/workExample.controller.js
+import prisma from '../lib/prisma.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { ImageType } from '@prisma/client';
+
+// Хелпер для удаления файлов
+const deleteFile = async (filePath) => {
+	try {
+		// filePath будет вида /uploads/image.png, поэтому строим полный путь
+		const fullPath = path.join(process.cwd(), filePath);
+		await fs.unlink(fullPath);
+	} catch (error) {
+		// Не страшно, если файл уже удален, но логируем другие ошибки
+		if (error.code !== 'ENOENT') {
+			console.error(`Failed to delete file: ${filePath}`, error);
+		}
+	}
+};
+
+export const workExampleController = {
+	// GET /api/work-examples - Получить все примеры работ
+	async getAll(req, res) {
+		try {
+			const workExamples = await prisma.workExample.findMany({
+				include: { images: true, service: true }, // Включаем изображения и связанную услугу
+			});
+			res.json(workExamples);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch work examples' });
+		}
+	},
+
+	// GET /api/work-examples/:id - Получить один пример работы
+	async getById(req, res) {
+		try {
+			const { id } = req.params;
+			const workExample = await prisma.workExample.findUnique({
+				where: { id },
+				include: { images: true, service: true },
+			});
+			if (!workExample) {
+				res.status(404).json({ error: 'Work example not found' });
+				return;
+			}
+			res.json(workExample);
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to fetch work example' });
+		}
+	},
+
+	// POST /api/work-examples - Создать новый пример работы
+	async create(req, res) {
+		try {
+			const { name, date, description, serviceId } = req.body;
+			const files = req.files;
+
+			if (!serviceId) {
+				res.status(400).json({ error: 'serviceId is required' });
+				return;
+			}
+
+			const imagesToCreate =
+				files?.map((file) => ({
+					urlSingle: `/uploads/${file.filename}`,
+					type: ImageType.SINGLE,
+				})) || [];
+
+			const newWorkExample = await prisma.workExample.create({
+				data: {
+					name,
+					date: date ? new Date(date) : new Date(),
+					description,
+					serviceId,
+					images: {
+						create: imagesToCreate,
+					},
+				},
+				include: { images: true, service: true },
+			});
+			res.status(201).json(newWorkExample);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to create work example',
+				details: error.message,
+			});
+		}
+	},
+
+	// PUT /api/work-examples/:id - Обновить пример работы
+	async update(req, res) {
+		try {
+			const { id } = req.params;
+			const { name, date, description, serviceId } = req.body;
+			const files = req.files;
+			let oldImages = [];
+
+			const updatedWorkExample = await prisma.$transaction(async (tx) => {
+				// 1. Если загружены новые файлы, удаляем старые записи
+				if (files && files.length > 0) {
+					const workExampleToUpdate = await tx.workExample.findUnique({
+						where: { id },
+						select: { images: { select: { urlSingle: true } } },
+					});
+					oldImages = workExampleToUpdate?.images || [];
+
+					await tx.image.deleteMany({
+						where: { workExampleId: id },
+					});
+				}
+
+				// 2. Обновляем данные и создаем новые записи Image
+				const imagesToCreate =
+					files?.map((file) => ({
+						urlSingle: `/uploads/${file.filename}`,
+						type: ImageType.SINGLE,
+					})) || undefined;
+
+				return tx.workExample.update({
+					where: { id },
+					data: {
+						name,
+						date: date ? new Date(date) : undefined,
+						description,
+						serviceId,
+						...(imagesToCreate && {
+							images: {
+								create: imagesToCreate,
+							},
+						}),
+					},
+					include: { images: true, service: true },
+				});
+			});
+
+			// 3. После успешной транзакции удаляем старые файлы с диска
+			for (const image of oldImages) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.json(updatedWorkExample);
+		} catch (error) {
+			res.status(500).json({
+				error: 'Failed to update work example',
+				details: error.message,
+			});
+		}
+	},
+
+	// DELETE /api/work-examples/:id - Удалить пример работы
+	async delete(req, res) {
+		try {
+			const { id } = req.params;
+
+			const workExampleToDelete = await prisma.workExample.findUnique({
+				where: { id },
+				include: { images: true },
+			});
+			const imagesToDelete = workExampleToDelete?.images || [];
+
+			await prisma.workExample.delete({
+				where: { id },
+			});
+
+			for (const image of imagesToDelete) {
+				if (image.urlSingle) {
+					await deleteFile(image.urlSingle);
+				}
+			}
+
+			res.status(204).send(); // No Content
+		} catch (error) {
+			res.status(500).json({ error: 'Failed to delete work example' });
+		}
+	},
+};
+
+```
+
+## src/lib/prisma.js
+
+```javascript
+// src/lib/prisma.js
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export default prisma;
+
+```
+
+## src/middleware/upload.js
+
+```javascript
+// src/middleware/upload.js
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+// Путь к директории для загрузок
+const uploadDir = 'uploads';
+
+// Убедимся, что директория для загрузок существует
+if (!fs.existsSync(uploadDir)) {
+	fs.mkdirSync(uploadDir);
+}
+
+// Настройка хранилища для multer
+const storage = multer.diskStorage({
+	// Указываем, куда сохранять файлы
+	destination: (req, file, cb) => {
+		cb(null, uploadDir);
+	},
+	// Генерируем уникальное имя для каждого файла
+	filename: (req, file, cb) => {
+		const uniqueSuffix =
+			Date.now() + '-' + Math.round(Math.random() * 1e9);
+		const extension = path.extname(file.originalname);
+		cb(null, file.fieldname + '-' + uniqueSuffix + extension);
+	},
+});
+
+// Создаем экземпляр multer с настроенным хранилищем
+const upload = multer({ storage: storage });
+
+export default upload;
+
+```
+
+## src/routes/car.routes.js
+
+```javascript
+// src/routes/car.routes.js
+import { Router } from 'express';
+import { carController } from '../controllers/car.controller.js';
+import upload from '../middleware/upload.js';
+
+const carRouter = Router();
+
+// 'images' - это имя поля в multipart/form-data, 10 - макс. кол-во файлов
+const uploader = upload.array('images', 10);
+
+carRouter.get('/', carController.getAll);
+carRouter.post('/', uploader, carController.create);
+carRouter.get('/:id', carController.getById);
+carRouter.put('/:id', uploader, carController.update);
+carRouter.delete('/:id', carController.delete);
+
+export default carRouter;
+
+```
+
+## src/routes/index.js
+
+```javascript
+// src/routes/index.js
+import { Router } from 'express';
+import carRouter from './car.routes.js';
+import serviceRouter from './service.routes.js';
+import workExampleRouter from './workExample.routes.js';
+import settingsRouter from './settings.routes.js';
+
+const apiRouter = Router();
+
+// Регистрируем все роутеры в приложении
+apiRouter.use('/cars', carRouter);
+apiRouter.use('/services', serviceRouter);
+apiRouter.use('/work-examples', workExampleRouter);
+apiRouter.use('/settings', settingsRouter);
+
+export default apiRouter;
+
+```
+
+## src/routes/service.routes.js
+
+```javascript
+// src/routes/service.routes.js
+import { Router } from 'express';
+import { serviceController } from '../controllers/service.controller.js';
+import upload from '../middleware/upload.js';
+
+const serviceRouter = Router();
+
+const uploader = upload.array('images', 10);
+
+serviceRouter.get('/', serviceController.getAll);
+serviceRouter.post('/', uploader, serviceController.create);
+serviceRouter.get('/:id', serviceController.getById);
+serviceRouter.put('/:id', uploader, serviceController.update);
+serviceRouter.delete('/:id', serviceController.delete);
+
+export default serviceRouter;
+
+```
+
+## src/routes/settings.routes.js
+
+```javascript
+// src/routes/settings.routes.js
+import { Router } from 'express';
+import { settingsController } from '../controllers/settings.controller.js';
+
+const settingsRouter = Router();
+
+settingsRouter.get('/', settingsController.get);
+// Используем POST для создания или обновления
+settingsRouter.post('/', settingsController.update);
+// Можно также добавить PUT для семантической корректности
+settingsRouter.put('/', settingsController.update);
+
+export default settingsRouter;
+
+```
+
+## src/routes/workExample.routes.js
+
+```javascript
+// src/routes/workExample.routes.js
+import { Router } from 'express';
+import { workExampleController } from '../controllers/workExample.controller.js';
+import upload from '../middleware/upload.js';
+
+const workExampleRouter = Router();
+
+const uploader = upload.array('images', 10);
+
+workExampleRouter.get('/', workExampleController.getAll);
+workExampleRouter.post('/', uploader, workExampleController.create);
+workExampleRouter.get('/:id', workExampleController.getById);
+workExampleRouter.put('/:id', uploader, workExampleController.update);
+workExampleRouter.delete('/:id', workExampleController.delete);
+
+export default workExampleRouter;
+
+```
+
+## src/server.js
+
+```javascript
+// src/server.js
+import 'dotenv/config'; // Загружает переменные из .env
+import app from './app.js';
+
+const PORT = process.env.PORT || 3001;
+
+// Запуск сервера
+const server = app.listen(PORT, () => {
+	console.log(`🚀 Server is running on http://localhost:${PORT}`);
+});
+
+export const viteNodeApp = app; // Экспорт для vite-plugin-node
+
+```
+
+## prisma/migrations/20250611174926_init/migration.sql
+
+```sql
+-- CreateEnum
+CREATE TYPE "ImageType" AS ENUM ('SINGLE', 'BEFORE_AFTER');
+
+-- CreateTable
+CREATE TABLE "Image" (
+    "id" TEXT NOT NULL,
+    "description" TEXT,
+    "urlSingle" TEXT,
+    "urlBefore" TEXT,
+    "urlAfter" TEXT,
+    "type" "ImageType" NOT NULL,
+    "carId" TEXT,
+    "serviceId" TEXT,
+    "workExampleId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Car" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "description" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Car_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Service" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WorkExample" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "description" TEXT NOT NULL,
+    "serviceId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "WorkExample_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SiteSettings" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "mainTitle" TEXT NOT NULL DEFAULT 'Название автосервиса',
+    "mainSubtitle" TEXT NOT NULL DEFAULT 'Лучший сервис в вашем городе',
+    "phoneNumber" TEXT NOT NULL DEFAULT '+7 (000) 000-00-00',
+    "socialInstagram" TEXT NOT NULL DEFAULT 'https://instagram.com',
+    "socialVk" TEXT NOT NULL DEFAULT 'https://vk.com',
+    "address" TEXT NOT NULL DEFAULT 'г. Город, ул. Улица, д. 1',
+    "workingHours" TEXT NOT NULL DEFAULT 'Пн-Пт: 9:00 - 21:00',
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SiteSettings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Service_name_key" ON "Service"("name");
+
+-- AddForeignKey
+ALTER TABLE "Image" ADD CONSTRAINT "Image_carId_fkey" FOREIGN KEY ("carId") REFERENCES "Car"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Image" ADD CONSTRAINT "Image_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Image" ADD CONSTRAINT "Image_workExampleId_fkey" FOREIGN KEY ("workExampleId") REFERENCES "WorkExample"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WorkExample" ADD CONSTRAINT "WorkExample_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+## prisma/migrations/migration_lock.toml
+
+```toml
+provider = "postgresql"
+```
+
+## prisma/schema.prisma
+
+```prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------- СУЩНОСТИ -----------
+
+// Тип изображения: одиночное или "до/после"
+enum ImageType {
+  SINGLE
+  BEFORE_AFTER
+}
+
+model Image {
+  id          String @id @default(cuid())
+  description String? // Описание (Markdown)
+  
+  // Поля для разных типов ссылок
+  urlSingle   String?
+  urlBefore   String?
+  urlAfter    String?
+
+  type        ImageType
+
+  // Связи (изображение может принадлежать одной из сущностей)
+  carId         String?
+  car           Car?     @relation(fields: [carId], references: [id], onDelete: Cascade)
+  
+  serviceId     String?
+  service       Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  workExampleId String?
+  workExample   WorkExample? @relation(fields: [workExampleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Car {
+  id          String  @id @default(cuid())
+  name        String
+  price       Float
+  description String // Описание (Markdown)
+  images      Image[] // Массив изображений (связь "один ко многим")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String  // Описание (Markdown)
+  images      Image[] // Массив изображений (связь "один ко многим")
+
+  workExamples WorkExample[] // Услуга может иметь много примеров работ
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkExample {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  description String   // Описание (Markdown)
+  images      Image[]  // Массив изображений (связь "один ко многим")
+  
+  // Связь с услугой (многие примеры к одной услуге)
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+// ----------- УНИКАЛЬНЫЕ ДАННЫЕ (НАСТРОЙКИ САЙТА) -----------
+// Будет всего одна запись в этой таблице
+model SiteSettings {
+  id              Int      @id @default(1) // Фиксированный ID для единственной записи
+  mainTitle       String   @default("Название автосервиса")
+  mainSubtitle    String   @default("Лучший сервис в вашем городе")
+  phoneNumber     String   @default("+7 (000) 000-00-00")
+  socialInstagram String   @default("https://instagram.com")
+  socialVk        String   @default("https://vk.com")
+  address         String   @default("г. Город, ул. Улица, д. 1")
+  workingHours    String   @default("Пн-Пт: 9:00 - 21:00")
+  
+  updatedAt       DateTime @updatedAt
+}
+```
+
+---
+
+ПОЧЕМУ НА ЗАПРОС 
+
+index-CIB5tW3n.js:213 
+ GET https://tradeauto-group.ru/api/services 502 (Bad Gateway)

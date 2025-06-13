@@ -21,7 +21,7 @@ const SettingsEditPage: React.FC = () => {
 		queryKey: ['siteSettings'],
 		queryFn: async () => {
 			// fetchSettings возвращает трансформированные данные, нам нужны сырые
-			const response = await fetch('http://localhost:3001/api/settings');
+			const response = await fetch('/api/settings');
 			if (!response.ok) throw new Error('Network response was not ok');
 			return (await response.json()) as RestApiSettings;
 		},
